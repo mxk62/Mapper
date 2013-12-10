@@ -77,5 +77,9 @@ class Chemical:
 if __name__ == '__main__':
     smi = 'CC1CCCC2CCCC(C)C12'
     chem = Chemical(smi)
+    chem.init_ecs()
+    for a in chem.mol.GetAtoms():
+        print a.GetSymbol(), a.GetIdx(), a.GetProp('EC')
+    chem.increment_ecs()
     for a in chem.mol.GetAtoms():
         print a.GetSymbol(), a.GetIdx(), a.GetProp('EC')
