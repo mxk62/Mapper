@@ -19,7 +19,7 @@ class Reaction:
         except ValueError:
             raise ValueError("Invalid product SMILES")
 
-    def get_core(self):
+    def find_core(self):
         """Extracts a reaction core.
 
         Function uses the Lynch-Willet algorithm to detect the reaction center.
@@ -69,3 +69,9 @@ class Reaction:
         for idx, ec in enumerate(ecs):
             ec_map.setdefault(ec, []).append(idx)
         return ec_map
+
+
+if __name__ == '__main__':
+    smarts = 'CC(=C)CC(C)C(CC#N)C(=C)N>>CC(=C)CC(C)C(CC#N)C#N'
+    rxn = Reaction(smarts)
+    print rxn.find_core()
