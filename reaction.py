@@ -10,14 +10,12 @@ class Reaction:
     def __init__(self, smiles):
         self.reactant_smiles, self.product_smiles = smiles.split('>>')
         try:
-            self.reactant = [Chemical(s)
-                             for s in self.reactant_smiles]
+            self.reactant = Chemical(self.reactant_smiles)
         except ValueError:
             raise ValueError("Invalid reactant SMILES")
 
         try:
-            self.product = [Chemical(s)
-                            for s in self.product_smiles]
+            self.product = Chemical(self.product_smiles)
         except ValueError:
             raise ValueError("Invalid product SMILES")
 
@@ -43,8 +41,8 @@ class Reaction:
             next_product_ecs = self.product.increent_ecs()
 
         # Convert reactant and product to RDKit's editable molecules.
-        editable_reactant = Chem.EditableMol(self.reactant)
-        editable_product = Chem.EditableMol(self.product)
+        editable_reactant = Chem.EditableMol(self.reactant.mol)
+        editable_product = Chem.EditableMol(self.product.mol)
 
         # Delete all atoms in EC-MCS from the reactant and the product.
         reactant_map = self.make_ec_map(prev_reactant_ecs)
@@ -53,8 +51,13 @@ class Reaction:
             [editable_reactant.RemoveAtom(i) for i in reactant_map[ec]]
             [editable_product.RemoveAtom(i) for i in product_map[ec]]
 
-        self.reactant = editable_reactant.GetMol()
-        self.product = editable_product.GetMol()
+
+
+        self.reactant.remove_atoms()
+        self.product.remove_atoms()
+
+        return '>>'.join([Chem.MolToSmiles(self.reactant.mol),
+                          Chem.MolToSmiles(self.product.mol)])
 
     def make_ec_map(self, ecs):
         """Returns a map between atoms ECs and their indices.
