@@ -29,16 +29,16 @@ class Reaction:
         next_reactant_ecs = self.reactant.init_ecs()
         next_product_ecs = self.product.init_ecs()
 
-        # Calculate higher order ECs until there are NO pairs of atoms for which
-        # $EC_{r_{i}}^{n} = EC_{p_{j}}^{n}$.
-        while set(next_reactant_ecs) & set(next_product_ecs):
+        # Calculate higher order ECs until there are NO pairs of atoms for
+        # which $EC_{r_{i}}^{n} = EC_{p_{j}}^{n}$.
+        while set(next_reactant_ecs).intersection(next_product_ecs):
             # Save current sets of ECs.
-            prev_reactant_ecs = next_reactant_ecs
-            prev_product_ecs = next_product_ecs
+            prev_reactant_ecs = list(next_reactant_ecs)
+            prev_product_ecs = list(next_product_ecs)
 
             # Calculate test set of ECs for reactant and product.
             next_reactant_ecs = self.reactant.increment_ecs()
-            next_product_ecs = self.product.increent_ecs()
+            next_product_ecs = self.product.increment_ecs()
 
         # Convert reactant and product to RDKit's editable molecules.
         editable_reactant = Chem.EditableMol(self.reactant.mol)
