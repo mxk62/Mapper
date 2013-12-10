@@ -10,6 +10,7 @@ class Chemical:
         except:
             raise ValueError('Invalid chemical SMILES.')
         self.smiles = Chem.MolToSmiles(self.mol)
+        self.ec_order = None
 
     def increment_ecs(self):
         """Sets and returns a tuple representing atom EC indices.
@@ -26,10 +27,11 @@ class Chemical:
         of the corresponding atom.
         """
         for a in self.mol.GetAtoms():
-            ecn = 2 * a.GetProp('EC') + \
-                sum(n.GetProp('EC') for n in a.GetNeighbors())
-            a.SetProp('EC', ecn)
-        return tuple(a.GetProp('EC') for a in self.mol.GetAtoms)
+            ecn = 2 * int(a.GetProp('EC')) + \
+                sum(int(n.GetProp('EC')) for n in a.GetNeighbors())
+            a.SetProp('EC', str(ecn))
+        self.ec_order += 1
+        return tuple(int(a.GetProp('EC')) for a in self.mol.GetAtoms())
 
     def init_ecs(self):
         """Sets and returns a tuple representing initial EC indices.
@@ -43,8 +45,10 @@ class Chemical:
         """
         for a in self.mol.GetAtoms():
             ec = len(a.GetNeighbors())
-            a.SetProp('EC', ec)
-        return tuple(a.GetProp('EC') for a in self.mol.GetAtoms)
+            a.SetProp('EC', str(ec))
+        self.ec_order = 0
+        return tuple(int(a.GetProp('EC')) for a in self.mol.GetAtoms())
+
 
 if __name__ == 'main':
     smi = 'C'
