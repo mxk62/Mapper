@@ -11,6 +11,7 @@ class Chemical:
             raise ValueError('Invalid chemical SMILES.')
         self.smiles = Chem.MolToSmiles(self.mol)
         self.ec_order = None
+        self.d = self.mol.GetDistanceMatrix()
 
     def increment_ecs(self):
         """Sets and returns a tuple representing atom EC indices.
@@ -49,9 +50,32 @@ class Chemical:
         self.ec_order = 0
         return tuple(int(a.GetProp('EC')) for a in self.mol.GetAtoms())
 
+    def remove_atoms(self, indices):
+        """Removes atoms with given indices.
 
-if __name__ == 'main':
-    smi = 'C'
+        Every time an atom with is removed from a molecule, atom indices
+        higher than the deleted atom's index are adjusted. Thus, we are
+        removing them in reversed order, i.e. starting from the atom with
+        highest.
+        """
+        e = Chem.EditableMol()
+        for i in sorted(indices, reverse=True):
+            e.RemoveAtom(i)
+        self.mol = e.GetMol()
+
+    def find_ec_mcs(self, index):
+        """Returns indices of all atoms belonging to a given EC-MCS.
+
+        The atom's $n$-order EC index may be treated as a hash of a circular
+        substructure with a radius $(n - 1)$ bonds. Function returns indices of
+        ALL atoms lying within.
+        """
+        return [idx for idx, dist in enumerate(self.d[index])
+                if dist < self.ec_order - 1]
+
+
+if __name__ == '__main__':
+    smi = 'CC1CCCC2CCCC(C)C12'
     chem = Chemical(smi)
     for a in chem.mol.GetAtoms():
         print a.GetSymbol(), a.GetIdx(), a.GetProp('EC')
