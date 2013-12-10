@@ -47,11 +47,8 @@ class Reaction:
         # Delete all atoms in EC-MCS from the reactant and the product.
         reactant_map = self.make_ec_map(prev_reactant_ecs)
         product_map = self.make_ec_map(prev_product_ecs)
-        for ec in reactant_map.intersection(product_map):
-            [editable_reactant.RemoveAtom(i) for i in reactant_map[ec]]
-            [editable_product.RemoveAtom(i) for i in product_map[ec]]
-
-
+        for ec in set(reactant_map).intersection(product_map):
+            pass
 
         self.reactant.remove_atoms()
         self.product.remove_atoms()
