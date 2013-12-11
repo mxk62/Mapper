@@ -11,7 +11,7 @@ class Chemical:
             raise ValueError('Invalid chemical SMILES.')
         self.smiles = Chem.MolToSmiles(self.mol)
         self.ec_order = None
-        self.d = self.mol.GetDistanceMatrix()
+        self.d = Chem.GetDistanceMatrix(self.mol)
 
     def increment_ecs(self):
         """Sets and returns a tuple representing atom EC indices.
@@ -58,7 +58,7 @@ class Chemical:
         removing them in reversed order, i.e. starting from the atom with
         highest.
         """
-        e = Chem.EditableMol()
+        e = Chem.EditableMol(self.mol)
         for i in sorted(indices, reverse=True):
             e.RemoveAtom(i)
         self.mol = e.GetMol()
