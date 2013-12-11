@@ -50,6 +50,16 @@ class Chemical:
         self.ec_order = 0
         return tuple(int(a.GetProp('EC')) for a in self.mol.GetAtoms())
 
+    def clear_ecs(self):
+        """Clear EC indices from molecule's atoms.
+
+        Function literally removes EC indices from molecule's atoms, i.e.
+        the property is removed along with the value it holds.
+        """
+        for a in self.mol.GetAtoms():
+            a.ClearProp('EC')
+        self.ec_order = None
+
     def remove_atoms(self, indices):
         """Removes atoms with given indices.
 
