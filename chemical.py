@@ -62,6 +62,7 @@ class Chemical:
         for i in sorted(indices, reverse=True):
             e.RemoveAtom(i)
         self.mol = e.GetMol()
+        self.smiles = Chem.MolToSmiles(self.mol)
 
     def find_ec_mcs(self, index):
         """Returns indices of all atoms belonging to a given EC-MCS.
