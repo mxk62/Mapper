@@ -40,18 +40,19 @@ class Reaction:
             next_reactant_ecs = self.reactant.increment_ecs()
             next_product_ecs = self.product.increment_ecs()
 
-        # Convert reactant and product to RDKit's editable molecules.
-        editable_reactant = Chem.EditableMol(self.reactant.mol)
-        editable_product = Chem.EditableMol(self.product.mol)
-
         # Delete all atoms in EC-MCS from the reactant and the product.
+        reactant_ec_mcs = set([])
+        product_ec_mcs = set([])
         reactant_map = self.make_ec_map(prev_reactant_ecs)
         product_map = self.make_ec_map(prev_product_ecs)
         for ec in set(reactant_map).intersection(product_map):
-            pass
+            for idx in reactant_map[ec]:
+                reactant_ec_mcs.update(self.reactant.find_ec_mcs(idx))
+            for idx in product_map[ec]:
+                product_ec_mcs.update(self.product.find_ec_mcs(idx))
 
-        self.reactant.remove_atoms()
-        self.product.remove_atoms()
+        self.reactant.remove_atoms(reactant_ec_mcs)
+        self.product.remove_atoms(product_ec_mcs)
 
         return '>>'.join([Chem.MolToSmiles(self.reactant.mol),
                           Chem.MolToSmiles(self.product.mol)])
@@ -69,6 +70,7 @@ class Reaction:
 
 
 if __name__ == '__main__':
-    smarts = 'CC(=C)CC(C)C(CC#N)C(=C)N>>CC(=C)CC(C)C(CC#N)C#N'
+    smarts = 'CC(=O)CC(C)C(CC#N)C(=O)N>>CC(=O)CC(C)C(CC#N)C#N'
     rxn = Reaction(smarts)
+    # Should print something like N#CC.C(=O)N>>N#CC.N#C
     print rxn.find_core()
