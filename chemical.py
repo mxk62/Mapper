@@ -27,10 +27,14 @@ class Chemical:
         It returns a tuple in which the $i$-th element represent the EC index
         of the corresponding atom.
         """
-        for a in self.mol.GetAtoms():
-            ecn = 2 * int(a.GetProp('EC')) + \
-                sum(int(n.GetProp('EC')) for n in a.GetNeighbors())
-            a.SetProp('EC', str(ecn))
+
+        # Firstly, calculate ALL next order EC indices and change them
+        # AFTERWARDS. Updating them on-the-fly will lead to serious errors
+        # as there will be atoms with indices of $(n - 1)$ order while
+        # others will already have $n$ order indices.
+        ecn_indices = [self.find_ecn(a) for a in self.mol.GetAtoms()]
+        for idx, ecn in enumerate(ecn_indices):
+            self.mol.GetAtomWithIdx(idx).SetProp('EC', str(ecn))
         self.ec_order += 1
         return tuple(int(a.GetProp('EC')) for a in self.mol.GetAtoms())
 
@@ -59,6 +63,16 @@ class Chemical:
         for a in self.mol.GetAtoms():
             a.ClearProp('EC')
         self.ec_order = None
+
+    def find_ecn(self, atom):
+        """"Calculates and returns a given atom next order EC index.
+
+        It initializes EC indices on molecule's atoms, if necessary.
+        """
+        if self.ec_order is None:
+            self.init_ecs()
+        return 2 * int(atom.GetProp('EC')) + \
+               sum(int(n.GetProp('EC')) for n in atom.GetNeighbors())
 
     def remove_atoms(self, indices):
         """Removes atoms with given indices.
