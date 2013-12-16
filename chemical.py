@@ -96,7 +96,7 @@ class Chemical:
         ALL atoms lying within.
         """
         return [idx for idx, dist in enumerate(self.d[index])
-                if dist < self.ec_order - 1]
+                if dist < self.ec_order]
 
 
 if __name__ == '__main__':
