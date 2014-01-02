@@ -1,3 +1,4 @@
+import numpy
 from rdkit import Chem
 
 
@@ -11,6 +12,7 @@ class Chemical:
             raise ValueError('Invalid chemical SMILES.')
         self.smiles = Chem.MolToSmiles(self.mol)
         self.ec_order = None
+        self.a = Chem.GetAdjacencyMatrix(self.mol)
         self.d = Chem.GetDistanceMatrix(self.mol)
 
     def increment_ecs(self):
@@ -28,15 +30,21 @@ class Chemical:
         of the corresponding atom.
         """
 
-        # Firstly, calculate ALL next order EC indices and change them
-        # AFTERWARDS. Updating them on-the-fly will lead to serious errors
-        # as there will be atoms with indices of $(n - 1)$ order while
-        # others will already have $n$ order indices.
-        ecn_indices = [self.find_ecn(a) for a in self.mol.GetAtoms()]
-        for idx, ecn in enumerate(ecn_indices):
+        # If EC indices were not initialized, do it now.
+        if self.ec_order is None:
+            self.init_ecs()
+
+        # Get current EC indices.
+        ecs = numpy.array([int(a.GetProp('EC')) for a in self.mol.GetAtoms()])
+
+        # Calculate higher order EC indices using Lynch-Willett formula.
+        ecs = 2 * ecs + numpy.dot(self.a, ecs)
+
+        # Update atom properties and order value.
+        for idx, ecn in enumerate(ecs):
             self.mol.GetAtomWithIdx(idx).SetProp('EC', str(ecn))
         self.ec_order += 1
-        return tuple(int(a.GetProp('EC')) for a in self.mol.GetAtoms())
+        return tuple(ecs)
 
     def init_ecs(self):
         """Sets and returns a tuple representing initial EC indices.
@@ -68,16 +76,6 @@ class Chemical:
             a.ClearProp('EC')
         self.ec_order = None
 
-    def find_ecn(self, atom):
-        """"Calculates and returns a given atom next order EC index.
-
-        It initializes EC indices on molecule's atoms, if necessary.
-        """
-        if self.ec_order is None:
-            self.init_ecs()
-        return 2 * int(atom.GetProp('EC')) + \
-               sum(int(n.GetProp('EC')) for n in atom.GetNeighbors())
-
     def remove_atoms(self, indices):
         """Removes atoms with given indices.
 
@@ -90,6 +88,8 @@ class Chemical:
         for i in sorted(indices, reverse=True):
             e.RemoveAtom(i)
         self.mol = e.GetMol()
+        self.a = Chem.GetAdjacencyMatrix(self.mol)
+        self.d = Chem.GetDistanceMatrix(self.mol)
         self.smiles = Chem.MolToSmiles(self.mol)
 
     def find_ec_mcs(self, index):
