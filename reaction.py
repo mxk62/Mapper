@@ -25,34 +25,47 @@ class Reaction:
         Function uses the Lynch-Willet algorithm to detect the reaction center.
         """
 
-        # Assign initial EC values to the reactant and the product.
-        next_reactant_ecs = self.reactant.init_ecs()
-        next_product_ecs = self.product.init_ecs()
+        iter = 0
+        while True:
+            print 'Iteration:', iter
+            # Assign initial EC values to the reactant and the product.
+            next_reactant_ecs = self.reactant.init_ecs()
+            next_product_ecs = self.product.init_ecs()
 
-        # Calculate higher order ECs until there are NO pairs of atoms for
-        # which $EC_{r_{i}}^{n} = EC_{p_{j}}^{n}$.
-        while set(next_reactant_ecs).intersection(next_product_ecs):
-            # Save current sets of ECs.
-            prev_reactant_ecs = list(next_reactant_ecs)
-            prev_product_ecs = list(next_product_ecs)
+            # Calculate higher order ECs until there are NO pairs of atoms for
+            # which $EC_{r_{i}}^{n} = EC_{p_{j}}^{n}$.
+            while set(next_reactant_ecs).intersection(next_product_ecs):
+                # Save current sets of ECs of the reactant and product.
+                prev_reactant_ecs = list(next_reactant_ecs)
+                prev_product_ecs = list(next_product_ecs)
 
-            # Calculate test set of ECs for reactant and product.
-            next_reactant_ecs = self.reactant.increment_ecs()
-            next_product_ecs = self.product.increment_ecs()
+                # Calculate test set of ECs for reactant and product.
+                next_reactant_ecs = self.reactant.increment_ecs()
+                next_product_ecs = self.product.increment_ecs()
 
-        # Delete all atoms in EC-MCS from the reactant and the product.
-        reactant_ec_mcs = set([])
-        product_ec_mcs = set([])
-        reactant_map = self.make_ec_map(prev_reactant_ecs)
-        product_map = self.make_ec_map(prev_product_ecs)
-        for ec in set(reactant_map).intersection(product_map):
-            for idx in reactant_map[ec]:
-                reactant_ec_mcs.update(self.reactant.find_ec_mcs(idx))
-            for idx in product_map[ec]:
-                product_ec_mcs.update(self.product.find_ec_mcs(idx))
+            # Find out EC-based maximal common substructure (EC-MCS).
+            reactant_ec_mcs = set([])
+            product_ec_mcs = set([])
 
-        self.reactant.remove_atoms(reactant_ec_mcs)
-        self.product.remove_atoms(product_ec_mcs)
+            # Create maps between EC and atom indices for both product and
+            # reactant.
+            reactant_map = self.make_ec_map(prev_reactant_ecs)
+            product_map = self.make_ec_map(prev_product_ecs)
+            common_ecs = set(reactant_map).intersection(product_map)
+            if not common_ecs:
+                break
+
+            for ec in common_ecs:
+                for idx in reactant_map[ec]:
+                    reactant_ec_mcs.update(self.reactant.find_ec_mcs(idx))
+                for idx in product_map[ec]:
+                    product_ec_mcs.update(self.product.find_ec_mcs(idx))
+
+            # Delete all atoms in EC-MCS from the reactant and the product.
+            self.reactant.remove_atoms(reactant_ec_mcs)
+            self.product.remove_atoms(product_ec_mcs)
+
+            iter += 1
 
         return '>>'.join([Chem.MolToSmiles(self.reactant.mol),
                           Chem.MolToSmiles(self.product.mol)])
