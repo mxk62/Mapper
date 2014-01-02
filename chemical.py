@@ -41,16 +41,20 @@ class Chemical:
     def init_ecs(self):
         """Sets and returns a tuple representing initial EC indices.
 
-        Function initializes EC indices on the molecule. Their are stored as
-        the 'EC' atom property. Right now, the initial values are just the
-        number of non-hydrogen bonds attached to a given atom.
+        Function initializes EC indices on the molecule. After Funatsu et al.
+        in Tetrahedron Computer Methodology 1, 53-69 (1988), the initial values
+        are calculated according to formula
+        \[
+            EC^{1}_{a_{i}} = 10 Z_{a_{i}} + \deg(a_{i})
+        \]
+        where $Z_{a_{i}}$ is the atomic number of $i$-th atom.
 
-        It returns a tuple in which the $i$-th element represent the EC
-        index of the corresponding atom.
+        Their are stored as the 'EC' atom property. Function returns a
+        tuple in which the $i$-th element represent the EC index of the
+        corresponding atom.
         """
         for a in self.mol.GetAtoms():
-            ec = len(a.GetNeighbors())
-            a.SetProp('EC', str(ec))
+            a.SetProp('EC', str(10 * a.GetAtomicNum() + len(a.GetNeighbors())))
         self.ec_order = 0
         return tuple(int(a.GetProp('EC')) for a in self.mol.GetAtoms())
 
