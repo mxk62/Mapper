@@ -25,9 +25,7 @@ class Reaction:
         Function uses the Lynch-Willet algorithm to detect the reaction center.
         """
 
-        iter = 0
         while True:
-            print 'Iteration:', iter
             # Assign initial EC values to the reactant and the product.
             next_reactant_ecs = self.reactant.init_ecs()
             next_product_ecs = self.product.init_ecs()
@@ -64,8 +62,6 @@ class Reaction:
             # Delete all atoms in EC-MCS from the reactant and the product.
             self.reactant.remove_atoms(reactant_ec_mcs)
             self.product.remove_atoms(product_ec_mcs)
-
-            iter += 1
 
         return '>>'.join([Chem.MolToSmiles(self.reactant.mol),
                           Chem.MolToSmiles(self.product.mol)])
