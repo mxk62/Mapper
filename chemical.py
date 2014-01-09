@@ -12,8 +12,8 @@ class Chemical:
             raise ValueError('Invalid chemical SMILES.')
         self.smiles = Chem.MolToSmiles(self.mol)
         self.ec_order = None
-        self.a = Chem.GetAdjacencyMatrix(self.mol)
-        self.d = Chem.GetDistanceMatrix(self.mol)
+        self.adjacency_matrix = Chem.GetAdjacencyMatrix(self.mol)
+        self.distance_matrix = Chem.GetDistanceMatrix(self.mol)
 
     def increment_ecs(self):
         """Sets and returns a tuple representing atom EC indices.
@@ -38,7 +38,7 @@ class Chemical:
         ecs = numpy.array([int(a.GetProp('EC')) for a in self.mol.GetAtoms()])
 
         # Calculate higher order EC indices using Lynch-Willett formula.
-        ecs = 2 * ecs + numpy.dot(self.a, ecs)
+        ecs = 2 * ecs + numpy.dot(self.adjacency_matrix, ecs)
 
         # Update atom properties and order value.
         for idx, ecn in enumerate(ecs):
@@ -88,8 +88,8 @@ class Chemical:
         for i in sorted(indices, reverse=True):
             e.RemoveAtom(i)
         self.mol = e.GetMol()
-        self.a = Chem.GetAdjacencyMatrix(self.mol)
-        self.d = Chem.GetDistanceMatrix(self.mol)
+        self.adjacency_matrix = Chem.GetAdjacencyMatrix(self.mol)
+        self.distance_matrix = Chem.GetDistanceMatrix(self.mol)
         self.smiles = Chem.MolToSmiles(self.mol)
 
     def find_ec_mcs(self, index):
@@ -99,7 +99,7 @@ class Chemical:
         substructure with a radius $(n - 1)$ bonds. Function returns indices of
         ALL atoms lying within.
         """
-        return [idx for idx, dist in enumerate(self.d[index])
+        return [idx for idx, dist in enumerate(self.distance_matrix[index])
                 if dist < self.ec_order]
 
 
