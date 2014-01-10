@@ -27,10 +27,10 @@ class Reaction:
 
         while True:
             # Assign initial EC values to the reactant and the product.
-            reactant_ecs = self.reactant.calc_init_ecs()
+            reactant_ecs = self.reactant.calc_init_ecs(index_type='funatsu')
             self.reactant.update_ecs(reactant_ecs)
 
-            product_ecs = self.product.calc_init_ecs()
+            product_ecs = self.product.calc_init_ecs(index_type='funatsu')
             self.product.update_ecs(product_ecs)
 
             # If there is no common indices, exit as there is nothing to do.
@@ -53,10 +53,11 @@ class Reaction:
             while True:
                 test_reactant_ecs = self.reactant.calc_next_ecs()
                 test_product_ecs = self.product.calc_next_ecs()
+
                 test_ec_order += 1
                 common_ecs = set(test_reactant_ecs).intersection(test_product_ecs)
 
-                if not common_ecs or test_ec_order > size_limit:
+                if not common_ecs or test_ec_order == size_limit:
                     break
 
                 self.reactant.update_ecs(test_reactant_ecs)
