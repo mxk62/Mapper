@@ -27,41 +27,71 @@ class Reaction:
 
         while True:
             # Assign initial EC values to the reactant and the product.
-            next_reactant_ecs = self.reactant.init_ecs()
-            next_product_ecs = self.product.init_ecs()
+            reactant_ecs = self.reactant.calc_init_ecs()
+            self.reactant.update_ecs(reactant_ecs)
+
+            product_ecs = self.product.calc_init_ecs()
+            self.product.update_ecs(product_ecs)
+
+            # If there is no common indices, exit as there is nothing to do.
+            if not set(reactant_ecs).intersection(product_ecs):
+                break
+
+            # Set size threshold to number of atoms in the smaller molecule.
+            #
+            # As an atom's EC index of $n$-th order can be treated as a "hash"
+            # of a circular substructure of radius $(n - 1)$ bonds centered on
+            # that atom, there is little point with going beyond the size of
+            # the smaller molecule. Though further iterations will keep
+            # increasing the EC indices on reactant and product, they mutual
+            # relations should stay unchanged.
+            size_limit = min(len(reactant_ecs), len(product_ecs))
 
             # Calculate higher order ECs until there are NO pairs of atoms for
             # which $EC_{r_{i}}^{n} = EC_{p_{j}}^{n}$.
-            while set(next_reactant_ecs).intersection(next_product_ecs):
-                # Save current sets of ECs of the reactant and product.
-                prev_reactant_ecs = list(next_reactant_ecs)
-                prev_product_ecs = list(next_product_ecs)
+            test_ec_order = self.reactant.ec_order
+            while True:
+                test_reactant_ecs = self.reactant.calc_next_ecs()
+                test_product_ecs = self.product.calc_next_ecs()
+                test_ec_order += 1
+                common_ecs = set(test_reactant_ecs).intersection(test_product_ecs)
 
-                # Calculate test set of ECs for reactant and product.
-                next_reactant_ecs = self.reactant.increment_ecs()
-                next_product_ecs = self.product.increment_ecs()
+                if not common_ecs or test_ec_order > size_limit:
+                    break
+
+                self.reactant.update_ecs(test_reactant_ecs)
+                self.product.update_ecs(test_product_ecs)
+
+            # Set match radius to $(n - 2)$, where $n$ is the order of
+            # last iteration.
+            rad = test_ec_order - 2
 
             # Find out EC-based maximal common substructure (EC-MCS).
+            #
+            # (1) Create maps between EC and atom indices for both product and
+            # reactant.
+            reactant_map = self.make_ec_map(self.reactant.ec_indices)
+            product_map = self.make_ec_map(self.product.ec_indices)
+
+            # (2) For all atoms sharing the same EC indices, find atoms
+            # belonging to a circular substructure of the match radius
+            # $r = n - 2$, centered on those atoms, i.e. EC-MCS.
             reactant_ec_mcs = set([])
             product_ec_mcs = set([])
-
-            # Create maps between EC and atom indices for both product and
-            # reactant.
-            reactant_map = self.make_ec_map(prev_reactant_ecs)
-            product_map = self.make_ec_map(prev_product_ecs)
-            common_ecs = set(reactant_map).intersection(product_map)
-            if not common_ecs:
-                break
-
-            for ec in common_ecs:
+            for ec in set(reactant_map).intersection(product_map):
                 for idx in reactant_map[ec]:
-                    reactant_ec_mcs.update(self.reactant.find_ec_mcs(idx))
+                    reactant_ec_mcs.update(self.reactant.find_ec_mcs(idx, rad))
                 for idx in product_map[ec]:
-                    product_ec_mcs.update(self.product.find_ec_mcs(idx))
+                    product_ec_mcs.update(self.product.find_ec_mcs(idx, rad))
 
-            # Delete all atoms in EC-MCS from the reactant and the product.
+            # (3) Delete all atoms in EC-MCS both from the reactant and
+            # the product.
             self.reactant.remove_atoms(reactant_ec_mcs)
             self.product.remove_atoms(product_ec_mcs)
+
+            # (4) Clear EC indices on the remaining atoms.
+            self.reactant.clear_ecs()
+            self.product.clear_ecs()
 
         return '>>'.join([Chem.MolToSmiles(self.reactant.mol),
                           Chem.MolToSmiles(self.product.mol)])
@@ -81,5 +111,5 @@ class Reaction:
 if __name__ == '__main__':
     smarts = 'CC(=O)CC(C)C(CC#N)C(=O)N>>CC(=O)CC(C)C(CC#N)C#N'
     rxn = Reaction(smarts)
-    # Should print something like N#CC.C(=O)N>>N#CC.N#C
+    # Should print something like C(=O)N>>C#N
     print rxn.find_core()

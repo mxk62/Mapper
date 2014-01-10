@@ -7,7 +7,7 @@ def test_find_core():
     # Test if it work properly at all.
     smiles = 'CC(=O)CC(C)C(CC#N)C(=O)N>>CC(=O)CC(C)C(CC#N)C#N'
     rxn = Reaction(smiles)
-    assert rxn.find_core() == 'N#CC.C(=O)N>>N#CC.N#C'
+    assert rxn.find_core == 'N#CC.C(=O)N>>N#CC.N#C'
 
 
 def test_make_ec_map():

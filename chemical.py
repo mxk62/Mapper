@@ -11,70 +11,71 @@ class Chemical:
         except:
             raise ValueError('Invalid chemical SMILES.')
         self.smiles = Chem.MolToSmiles(self.mol)
-        self.ec_order = None
         self.adjacency_matrix = Chem.GetAdjacencyMatrix(self.mol)
         self.distance_matrix = Chem.GetDistanceMatrix(self.mol)
 
-    def increment_ecs(self):
-        """Sets and returns a tuple representing atom EC indices.
+        # Attributes for handling extended connectivity (EC) indices.
+        # Variable 'ec_order' is rather self-explanatory. It is worth noting
+        # though that the element of 'ec_indices' should always correspond
+        # to respective atoms, i.e. first element should hold EC index of
+        # the first atom; the same should hold for the second and so on.
+        self.ec_order = None
+        self.ec_indices = []
 
-        Function calculates next order EC index for each atom in the molecule,
-        replacing the old values. The indices are increment using Lynch-Willet
-        formula, i.e.
+    def calc_init_ecs(self):
+        """Calculates and returns a tuple representing initial EC indices.
+
+        Function calculates and returns initial EC indices on the molecule.
+        After Funatsu et al. in Tetrahedron Computer Methodology 1,
+        53-69 (1988), the values are calculated according to formula
+        \[
+            EC^{1}_{a_{i}} = 10 Z_{a_{i}} + \deg(a_{i})
+        \]
+        where $Z_{a_{i}}$ is the atomic number of $i$-th atom.
+
+        Function returns a tuple in which the $i$-th element represent the EC
+        index of the corresponding atom. It does NOT update their values on
+        atoms.
+        """
+        return tuple([10 * a.GetAtomicNum() + len(a.GetNeighbors())
+                      for a in self.mol.GetAtoms()])
+
+    def calc_next_ecs(self):
+        """Calculates and returns a tuple representing next EC indices.
+
+        Function calculates next order EC indices for molecule's atom.
+        The indices are incremented according to Lynch-Willet formula, i.e.
         \[
             EC_{i}^{n} = 2 * EC_{i}^{n - 1} + \sum_{j} EC_{j}^{n - 1},
         \]
         where the summation goes over atoms adjacent to atom $i$.
 
         It returns a tuple in which the $i$-th element represent the EC index
-        of the corresponding atom.
+        of the corresponding atom. It does NOT updates their values on atoms.
         """
 
         # If EC indices were not initialized, do it now.
         if self.ec_order is None:
-            self.init_ecs()
+            self.ec_indices = self.calc_init_ecs()
+            self.ec_order = 1
 
-        # Get current EC indices.
-        ecs = numpy.array([int(a.GetProp('EC')) for a in self.mol.GetAtoms()])
-
-        # Calculate higher order EC indices using Lynch-Willett formula.
-        ecs = 2 * ecs + numpy.dot(self.adjacency_matrix, ecs)
-
-        # Update atom properties and order value.
-        for idx, ecn in enumerate(ecs):
-            self.mol.GetAtomWithIdx(idx).SetProp('EC', str(ecn))
-        self.ec_order += 1
-        return tuple(ecs)
-
-    def init_ecs(self):
-        """Sets and returns a tuple representing initial EC indices.
-
-        Function initializes EC indices on the molecule. After Funatsu et al.
-        in Tetrahedron Computer Methodology 1, 53-69 (1988), the initial values
-        are calculated according to formula
-        \[
-            EC^{1}_{a_{i}} = 10 Z_{a_{i}} + \deg(a_{i})
-        \]
-        where $Z_{a_{i}}$ is the atomic number of $i$-th atom.
-
-        Their are stored as the 'EC' atom property. Function returns a
-        tuple in which the $i$-th element represent the EC index of the
-        corresponding atom.
-        """
-        for a in self.mol.GetAtoms():
-            a.SetProp('EC', str(10 * a.GetAtomicNum() + len(a.GetNeighbors())))
-        self.ec_order = 0
-        return tuple(int(a.GetProp('EC')) for a in self.mol.GetAtoms())
+        # Calculate and return higher order EC indices using Lynch-Willett
+        # formula.
+        ecs = numpy.array(self.ec_indices)
+        return tuple(2 * ecs + numpy.dot(self.adjacency_matrix, ecs))
 
     def clear_ecs(self):
-        """Clear EC indices from molecule's atoms.
-
-        Function literally removes EC indices from molecule's atoms, i.e.
-        the property is removed along with the value it holds.
-        """
-        for a in self.mol.GetAtoms():
-            a.ClearProp('EC')
+        """Clear EC indices from molecule's atoms."""
         self.ec_order = None
+        self.ec_indices = []
+
+    def update_ecs(self, ecs):
+        """Updates EC indices on atoms and adjust their order."""
+        if self.ec_order is None:
+            self.ec_order = 1
+        else:
+            self.ec_order += 1
+        self.ec_indices = ecs
 
     def remove_atoms(self, indices):
         """Removes atoms with given indices.
@@ -92,23 +93,19 @@ class Chemical:
         self.distance_matrix = Chem.GetDistanceMatrix(self.mol)
         self.smiles = Chem.MolToSmiles(self.mol)
 
-    def find_ec_mcs(self, index):
+    def find_ec_mcs(self, index, radius):
         """Returns indices of all atoms belonging to a given EC-MCS.
 
         The atom's $n$-order EC index may be treated as a hash of a circular
-        substructure with a radius $(n - 1)$ bonds. Function returns indices of
+        substructure with a radius $(n - 2)$ bonds. Function returns indices of
         ALL atoms lying within.
         """
         return [idx for idx, dist in enumerate(self.distance_matrix[index])
-                if dist < self.ec_order]
+                if dist <= radius]
 
 
 if __name__ == '__main__':
     smi = 'CC1CCCC2CCCC(C)C12'
     chem = Chemical(smi)
-    chem.init_ecs()
-    for a in chem.mol.GetAtoms():
-        print a.GetSymbol(), a.GetIdx(), a.GetProp('EC')
-    chem.increment_ecs()
-    for a in chem.mol.GetAtoms():
-        print a.GetSymbol(), a.GetIdx(), a.GetProp('EC')
+    chem.calc_init_ecs()
+    chem.calc_next_ecs()
