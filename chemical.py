@@ -22,7 +22,7 @@ class Chemical:
         self.ec_order = None
         self.ec_indices = []
 
-    def calc_init_ecs(self, index_type='funtatsu'):
+    def calc_init_ecs(self, index_type='funatsu'):
         """Calculates and returns a tuple representing initial EC indices.
 
         Function returns a tuple in which the $i$-th element represent the EC
@@ -34,7 +34,7 @@ class Chemical:
             'morgan': self.get_morgan_identifier,
             'shelley': self.get_shelley_identifier
         }
-        get_identifier = methods.get(index_type, 'funatsu')
+        get_identifier = methods.get(index_type, self.get_funatsu_identifier)
         return tuple([get_identifier(a) for a in self.mol.GetAtoms()])
 
     @staticmethod
