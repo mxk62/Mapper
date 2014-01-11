@@ -63,10 +63,6 @@ class Reaction:
                 self.reactant.update_ecs(test_reactant_ecs)
                 self.product.update_ecs(test_product_ecs)
 
-            # Set match radius to $(n - 2)$, where $n$ is the order of
-            # last iteration.
-            rad = test_ec_order - 2
-
             # Find out EC-based maximal common substructure (EC-MCS).
             #
             # (1) Create maps between EC and atom indices for both product and
@@ -76,7 +72,9 @@ class Reaction:
 
             # (2) For all atoms sharing the same EC indices, find atoms
             # belonging to a circular substructure of the match radius
-            # $r = n - 2$, centered on those atoms, i.e. EC-MCS.
+            # $r = n - 2$ (where $n$ is the order of last iteration),
+            # centered on those atoms, i.e. EC-MCS.
+            rad = test_ec_order - 2
             reactant_ec_mcs = set([])
             product_ec_mcs = set([])
             for ec in set(reactant_map).intersection(product_map):
