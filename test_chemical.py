@@ -17,6 +17,24 @@ def test_clear_ecs():
     assert chem.ec_order is None and not chem.ec_indices
 
 
+def test_update_ecs():
+    """Returns True, if EC indices were updated correctly."""
+
+    # A chemical with having no EC indices.
+    chem = Chemical('CCO')
+    new_indices = (1, 2, 1)
+    chem.update_ecs(new_indices)
+    assert chem.ec_order == 1 and chem.ec_indices == new_indices
+
+    # A chemical with initial EC indices set.
+    chem = Chemical('CCO')
+    chem.ec_order = 1
+    chem.ec_indices = (1, 2, 1)
+    new_indices = (4, 6, 4)
+    chem.update_ecs(new_indices)
+    assert chem.ec_order == 2 and chem.ec_indices == new_indices
+
+
 def test_find_ec_mcs():
     pass
 
