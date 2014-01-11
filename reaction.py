@@ -97,7 +97,8 @@ class Reaction:
         return '>>'.join([Chem.MolToSmiles(self.reactant.mol),
                           Chem.MolToSmiles(self.product.mol)])
 
-    def make_ec_map(self, ecs):
+    @staticmethod
+    def make_ec_map(ecs):
         """Returns a map between atoms ECs and their indices.
 
         Creates and returns a dictionary which keys are the EC indices and
