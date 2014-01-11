@@ -88,7 +88,9 @@ class Reaction:
             self.reactant.remove_atoms(reactant_ec_mcs)
             self.product.remove_atoms(product_ec_mcs)
 
-            # (4) Clear EC indices on the remaining atoms.
+            # (4) Clear EC indices on the remaining atoms before next
+            # iteration as they are no longer valid (atoms bond patterns may
+            # have changed due to removal).
             self.reactant.clear_ecs()
             self.product.clear_ecs()
 
