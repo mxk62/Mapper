@@ -34,7 +34,7 @@ class Reaction:
             self.product.update_ecs(product_ecs)
 
             # If there is no common indices, exit as there is nothing to do.
-            if not set(reactant_ecs).intersection(product_ecs):
+            if not set(reactant_ecs) & set(product_ecs):
                 break
 
             # Set size threshold to number of atoms in the smaller molecule.
@@ -55,7 +55,7 @@ class Reaction:
                 test_product_ecs = self.product.calc_next_ecs()
 
                 test_ec_order += 1
-                common_ecs = set(test_reactant_ecs).intersection(test_product_ecs)
+                common_ecs = set(test_reactant_ecs) & set(test_product_ecs)
 
                 if not common_ecs or test_ec_order == size_limit:
                     break
@@ -77,7 +77,7 @@ class Reaction:
             rad = test_ec_order - 2
             reactant_ec_mcs = set([])
             product_ec_mcs = set([])
-            for ec in set(reactant_map).intersection(product_map):
+            for ec in set(reactant_map) & set(product_map):
                 for idx in reactant_map[ec]:
                     reactant_ec_mcs.update(self.reactant.find_ec_mcs(idx, rad))
                 for idx in product_map[ec]:
