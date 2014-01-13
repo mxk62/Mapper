@@ -37,46 +37,6 @@ class Chemical:
         get_identifier = methods.get(index_type, self.get_funatsu_identifier)
         return tuple([get_identifier(a) for a in self.mol.GetAtoms()])
 
-    @staticmethod
-    def get_funatsu_identifier(atom):
-        """Calculates and returns an initial EC index of a given atom.
-
-        After Funatsu et al. in Tetrahedron Computer Methodology 1,
-        53-69 (1988), the values are calculated according to formula
-        \[
-            EC^{1}_{a_{i}} = 10 Z_{a_{i}} + \deg(a_{i})
-        \]
-        where $Z_{a_{i}}$ is the atomic number of $i$-th atom.
-        """
-        return 10 * atom.GetAtomicNum() + len(atom.GetNeighbors())
-
-    @staticmethod
-    def get_morgan_identifier(atom):
-        """Calculates and returns an initial EC index of a given atom.
-
-        After Morgan ... the values is just number of nonhydrogen neighbours.
-        """
-        return len(atom.GetNeighbors())
-
-    @staticmethod
-    def get_shelley_identifier(atom):
-        """Calculates and returns an initial EC index of a given atom.
-
-        After Shelley and Munk in J. Chem. Inf. Com. Sci 17, 110 (1977),
-        the values are calculated as a sum of atom's elemental type
-        (C = 2, N = 3, O = 4, etc.) times 10 and number of covalent
-        (two-electrons) bonds by which it joins nonhydrogen atoms.
-        """
-
-        # Get atom's type. If not defined, revert to atomic number.
-        organic_subset = {
-            'B': 1, 'C': 2, 'N': 3, 'O': 4, 'P': 5,
-            'S': 6, 'F': 7, 'Cl': 8, 'Br': 9, 'I': 10
-        }
-        idx = organic_subset.get(atom.GetSymbol(), atom.GetAtomicNum())
-        valence = sum([b.GetValenceContrib(atom) for b in atom.GetBonds()])
-        return 10 * idx + int(valence)
-
     def calc_next_ecs(self):
         """Calculates and returns a tuple representing next EC indices.
 
@@ -150,6 +110,46 @@ class Chemical:
         """
         return set([self.get_shelley_identifier(self.mol.GetAtomWithIdx(i))
                     for i in atom_indices])
+
+    @staticmethod
+    def get_funatsu_identifier(atom):
+        """Calculates and returns an initial EC index of a given atom.
+
+        After Funatsu et al. in Tetrahedron Computer Methodology 1,
+        53-69 (1988), the values are calculated according to formula
+        \[
+            EC^{1}_{a_{i}} = 10 Z_{a_{i}} + \deg(a_{i})
+        \]
+        where $Z_{a_{i}}$ is the atomic number of $i$-th atom.
+        """
+        return 10 * atom.GetAtomicNum() + len(atom.GetNeighbors())
+
+    @staticmethod
+    def get_morgan_identifier(atom):
+        """Calculates and returns an initial EC index of a given atom.
+
+        After Morgan ... the values is just number of nonhydrogen neighbours.
+        """
+        return len(atom.GetNeighbors())
+
+    @staticmethod
+    def get_shelley_identifier(atom):
+        """Calculates and returns an initial EC index of a given atom.
+
+        After Shelley and Munk in J. Chem. Inf. Com. Sci 17, 110 (1977),
+        the values are calculated as a sum of atom's elemental type
+        (C = 2, N = 3, O = 4, etc.) times 10 and number of covalent
+        (two-electrons) bonds by which it joins nonhydrogen atoms.
+        """
+
+        # Get atom's type. If not defined, revert to atomic number.
+        organic_subset = {
+            'B': 1, 'C': 2, 'N': 3, 'O': 4, 'P': 5,
+            'S': 6, 'F': 7, 'Cl': 8, 'Br': 9, 'I': 10
+        }
+        idx = organic_subset.get(atom.GetSymbol(), atom.GetAtomicNum())
+        valence = sum([b.GetValenceContrib(atom) for b in atom.GetBonds()])
+        return 10 * idx + int(valence)
 
 
 if __name__ == '__main__':
