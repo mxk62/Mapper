@@ -138,7 +138,18 @@ class Chemical:
         ALL atoms lying within.
         """
         return [idx for idx, dist in enumerate(self.distance_matrix[index])
-                if dist <= radius]
+                if dist < radius]
+
+    def get_atom_classes(self, atom_indices):
+        """Returns a set representing atoms' classes.
+
+        Method finds out the classes of atoms (type and bond pattern)
+        from the list of indices supplied as its input argument. Currently,
+        it determines an atom's class using method described by Shelley and
+        Munk.
+        """
+        return set([self.get_shelley_identifier(self.mol.GetAtomWithIdx(i))
+                    for i in atom_indices])
 
 
 if __name__ == '__main__':

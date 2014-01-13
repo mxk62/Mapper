@@ -75,12 +75,40 @@ class Reaction:
             # $r = n - 2$ (where $n$ is the order of last iteration),
             # centered on those atoms, i.e. EC-MCS.
             rad = test_ec_order - 2
+
+            # According to Lynch and Willett, allowing match radius smaller
+            # than 2 bonds significantly increases the number of incorrect
+            # results. Thus, we are skipping finding the EC-MCS and
+            # terminating the procedure in such a case.
+            if rad < 2:
+                break
+
             reactant_ec_mcs = set([])
             product_ec_mcs = set([])
             for ec in set(reactant_map) & set(product_map):
-                for idx in reactant_map[ec]:
+
+                # If a given EC value corresponds to multiple atoms,
+                # check their equivalence, i.e. all reactant atoms are
+                # equivalent one to each other as well as to the product set.
+                # Move to next EC value if atoms are NOT equivalent.
+                reactant_classes = \
+                    self.reactant.get_atom_classes(reactant_map[ec])
+                product_classes = \
+                    self.product.get_atom_classes(product_map[ec])
+                if (len(reactant_classes) != 1 or len(product_classes) != 1 or
+                        reactant_classes != product_classes):
+                    continue
+
+                # If there are multiple equivalents, make an arbitrary
+                # assignment for each member and find relevant EC-MCSes.
+                #
+                # Here, we are assigning successive reactant atoms to
+                # successive product atoms until all possible assignments
+                # are made, i.e whichever list ends first.
+                threshold = min(len(reactant_map[ec]), len(product_map[ec]))
+                for idx in reactant_map[ec][:threshold]:
                     reactant_ec_mcs.update(self.reactant.find_ec_mcs(idx, rad))
-                for idx in product_map[ec]:
+                for idx in product_map[ec][:threshold]:
                     product_ec_mcs.update(self.product.find_ec_mcs(idx, rad))
 
             # (3) Delete all atoms in EC-MCS both from the reactant and
