@@ -33,6 +33,11 @@ class Reaction:
             product_ecs = self.product.calc_init_ecs(index_type='funatsu')
             self.product.update_ecs(product_ecs)
 
+            print "Initial values:"
+            print reactant_ecs
+            print product_ecs
+            print
+
             # If there is no common indices, exit as there is nothing to do.
             if not set(reactant_ecs) & set(product_ecs):
                 break
@@ -60,8 +65,15 @@ class Reaction:
                 if not common_ecs or test_ec_order == size_limit:
                     break
 
+                print test_reactant_ecs
+                print test_product_ecs
+                print common_ecs
+
                 self.reactant.update_ecs(test_reactant_ecs)
                 self.product.update_ecs(test_product_ecs)
+
+            print 'Iteration stopped at {0}'.format(test_ec_order)
+            print
 
             # Find out EC-based maximal common substructure (EC-MCS).
             #
@@ -111,6 +123,10 @@ class Reaction:
                 for idx in product_map[ec][:threshold]:
                     product_ec_mcs.update(self.product.find_ec_mcs(idx, rad))
 
+            print "Match radius:", rad
+            print "R atoms slated for removal:", sorted(reactant_ec_mcs)
+            print "P atoms slated for removal:", sorted(product_ec_mcs)
+
             # (3) Delete all atoms in EC-MCS both from the reactant and
             # the product.
             self.reactant.remove_atoms(reactant_ec_mcs)
@@ -139,7 +155,7 @@ class Reaction:
 
 
 if __name__ == '__main__':
+    # Should print CC(=O)N>>CC#N.
     smarts = 'CC(=O)CC(C)C(CC#N)C(=O)N>>CC(=O)CC(C)C(CC#N)C#N'
     rxn = Reaction(smarts)
-    # Should print something like C(=O)N>>C#N
     print rxn.find_core()
