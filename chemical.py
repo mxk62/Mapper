@@ -99,7 +99,7 @@ class Chemical:
         # Calculate and return higher order EC indices using Lynch-Willett
         # formula.
         ecs = numpy.array(self.ec_indices)
-        return tuple(2 * ecs + numpy.dot(self.adjacency_matrix, ecs))
+        return tuple(4 * ecs + numpy.dot(self.adjacency_matrix, ecs))
 
     def clear_ecs(self):
         """Clear EC indices from molecule's atoms."""
