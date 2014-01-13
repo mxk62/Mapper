@@ -144,5 +144,6 @@ class Chemical:
 if __name__ == '__main__':
     smi = 'CC1CCCC2CCCC(C)C12'
     chem = Chemical(smi)
-    chem.calc_init_ecs()
-    chem.calc_next_ecs()
+    print chem.smiles
+    print 'First order ECs:', chem.calc_init_ecs(index_type='morgan')
+    print 'Second order ECs:', chem.calc_next_ecs(index_type='morgan')
