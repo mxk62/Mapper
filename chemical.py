@@ -137,9 +137,10 @@ class Chemical:
         """Calculates and returns an initial EC index of a given atom.
 
         After Shelley and Munk in J. Chem. Inf. Com. Sci 17, 110 (1977),
-        the values are calculated as a sum of atom's elemental type
-        (C = 2, N = 3, O = 4, etc.) times 10 and number of covalent
-        (two-electrons) bonds by which it joins nonhydrogen atoms.
+        the values are two-digit integer, the most significant of which
+        specifies number of covalent (two-electrons) bonds by which it joins
+        nonhydrogen atoms, and the least significant of which designates
+        atom elemental type (i.e. C = 2, N = 3, O = 4, etc.)
         """
 
         # Get atom's type. If not defined, revert to atomic number.
@@ -148,8 +149,9 @@ class Chemical:
             'S': 6, 'F': 7, 'Cl': 8, 'Br': 9, 'I': 10
         }
         idx = organic_subset.get(atom.GetSymbol(), atom.GetAtomicNum())
-        valence = sum([b.GetValenceContrib(atom) for b in atom.GetBonds()])
-        return 10 * idx + int(valence)
+        valence = sum([int(b.GetValenceContrib(atom))
+                       for b in atom.GetBonds()])
+        return 10 * valence + idx
 
 
 if __name__ == '__main__':
