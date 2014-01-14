@@ -175,7 +175,8 @@ class Reaction:
 
 
 if __name__ == '__main__':
-    # Should print CC(=O)N>>CC#N.
-    smarts = 'CC(=O)CC(C)C(CC#N)C(=O)N>>CC(=O)CC(C)C(CC#N)C#N'
-    rxn = Reaction(smarts)
+    # Initial example from paper by Lynch and Willett. Output should read
+    #     CC(#=O)N>>CC#N
+    smiles = 'CC(=O)CC(C)C(CC#N)C(=O)N>>CC(=O)CC(C)C(CC#N)C#N'
+    rxn = Reaction(smiles)
     print rxn.find_core()
