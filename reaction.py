@@ -121,10 +121,19 @@ class Reaction:
                 # Here, we are assigning successive reactant atoms to
                 # successive product atoms until all possible assignments
                 # are made, i.e whichever list ends first.
-                threshold = min(len(reactant_map[ec]), len(product_map[ec]))
-                for idx in reactant_map[ec][:threshold]:
+                #threshold = min(len(reactant_map[ec]), len(product_map[ec]))
+                #for idx in reactant_map[ec][:threshold]:
+                #    reactant_ec_mcs.update(self.reactant.find_ec_mcs(idx,
+                # rad))
+                #for idx in product_map[ec][:threshold]:
+
+                # Proceed to next EC index, if mapping is ambiguous.
+                if len(reactant_map[ec]) != len(product_map[ec]):
+                    continue
+
+                for idx in reactant_map[ec]:
                     reactant_ec_mcs.update(self.reactant.find_ec_mcs(idx, rad))
-                for idx in product_map[ec][:threshold]:
+                for idx in product_map[ec]:
                     product_ec_mcs.update(self.product.find_ec_mcs(idx, rad))
 
             print "Match radius:", rad
