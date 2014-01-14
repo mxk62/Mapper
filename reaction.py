@@ -62,22 +62,29 @@ class Reaction:
             while True:
                 test_reactant_ecs = self.reactant.calc_next_ecs()
                 test_product_ecs = self.product.calc_next_ecs()
-
                 test_ec_order += 1
-                common_ecs = set(test_reactant_ecs) & set(test_product_ecs)
 
+                common_ecs = set(test_reactant_ecs) & set(test_product_ecs)
                 if not common_ecs or test_ec_order == size_limit:
                     break
-
-                print test_reactant_ecs
-                print test_product_ecs
-                print common_ecs
 
                 self.reactant.update_ecs(test_reactant_ecs)
                 self.product.update_ecs(test_product_ecs)
 
-            print 'Iteration stopped at {0}'.format(test_ec_order)
-            print
+            print 'Mappings (match radius: {0}):'.format(test_ec_order - 2)
+            for ec in set(self.reactant.ec_indices) & set(self.product.ec_indices):
+                r_map = [i for i, v in enumerate(self.reactant.ec_indices)
+                         if v == ec]
+                p_map = [i for i, v in enumerate(self.product.ec_indices)
+                         if v == ec]
+
+                r_atoms = [self.reactant.mol.GetAtomWithIdx(i).GetSymbol()
+                           for i in r_map]
+                p_atoms = [self.product.mol.GetAtomWithIdx(i).GetSymbol()
+                           for i in p_map]
+                print ec, ':', r_map, '<-->', p_map, ';', \
+                    r_atoms, '<-->', p_atoms
+
 
             # Find out EC-based maximal common substructure (EC-MCS).
             #
@@ -136,10 +143,6 @@ class Reaction:
                 for idx in product_map[ec]:
                     product_ec_mcs.update(self.product.find_ec_mcs(idx, rad))
 
-            print "Match radius:", rad
-            print "R atoms slated for removal:", sorted(reactant_ec_mcs)
-            print "P atoms slated for removal:", sorted(product_ec_mcs)
-
             # (3) Delete all atoms in EC-MCS both from the reactant and
             # the product.
             self.reactant.remove_atoms(reactant_ec_mcs)
@@ -150,6 +153,10 @@ class Reaction:
             # have changed due to removal).
             self.reactant.clear_ecs()
             self.product.clear_ecs()
+
+            print '>>'.join([Chem.MolToSmiles(self.reactant.mol),
+                             Chem.MolToSmiles(self.product.mol)])
+            print
 
         return '>>'.join([Chem.MolToSmiles(self.reactant.mol),
                           Chem.MolToSmiles(self.product.mol)])
