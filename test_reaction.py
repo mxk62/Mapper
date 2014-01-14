@@ -33,6 +33,12 @@ def test_find_core():
     rxn = Reaction(smiles)
     assert rxn.find_core() == 'cN(O)O>>cN'
 
+    smiles = '>>'.join([
+        'COc1ccc2c(c1)sc1c2CCC2C1=CCC2O',
+        'COc1ccc2c(c1)sc1c2CCC2C1CCC2O'
+    ])
+    rxn = Reaction(smiles)
+    assert rxn.find_core() == 'C=CC>>CCC'
 
     # Problematic reactions, violating algorithm assumption---no atom should
     # be deleted; also from the paper by Lynch and Willett.
