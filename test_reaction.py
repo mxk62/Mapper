@@ -10,35 +10,35 @@ def test_find_core():
         'CC(=O)CC(C)C(CC#N)C#N'
     ])
     rxn = Reaction(smiles)
-    assert rxn.find_core == 'CC(N)>>CC#N'
+    assert rxn.find_core() == 'CC(N)>>CC#N'
 
     smiles = '>>'.join([
         'NC(=O)C(c1ccccc1)(c1ccccc1)NS(=O)(=O)c1ccccc1',
         'O=C(O)C(NS(=O)(=O)c1ccccc1)(c1ccccc1)c1ccccc1'
     ])
     rxn = Reaction(smiles)
-    assert rxn.find_core == 'NC=O>>OC=O'
+    assert rxn.find_core() == 'NC=O>>OC=O'
 
     smiles = '>>'.join([
         'CCC(c1cc(OC)c(OC(C)=O)cc1Cc1ccc(OC(C)=O)c(OC)c1)C(C)OC(C)=O',
         'CCC(c1cc(OC)c(OC(C)=O)cc1C(=O)c1ccc(OC(C)=O)c(OC)c1)C(C)OC(C)=O'
     ])
     rxn = Reaction(smiles)
-    assert rxn.find_core == 'cCc>>cC(c)=O'
+    assert rxn.find_core() == 'cCc>>cC(c)=O'
 
     smiles = '>>'.join([
         'ON(O)c1ccccc1S(=O)(=O)N(C)c1ccccc1',
         'Nc1ccccc1S(=O)(=O)N(C)c1ccccc1'
     ])
     rxn = Reaction(smiles)
-    assert rxn.find_core == 'cN(O)(O)>>cN'
+    assert rxn.find_core() == 'cN(O)(O)>>cN'
 
     smiles = '>>'.join([
         'COc1ccc2c(c1)sc1c2CCC2C1=CCC2O',
         'COc1ccc2c(c1)sc1c2CCC2C1CCC2O'
     ])
     rxn = Reaction(smiles)
-    assert rxn.find_core == 'C=CC>>CCC
+    assert rxn.find_core() == 'C=CC>>CCC'
 
 
     # Problematic reactions, violating algorithm assumption---no atom should
@@ -61,7 +61,7 @@ def test_find_core():
         'Nc1on=c2c=1CCCC2'
     ])
     rxn = Reaction(smiles)
-    assert rxn.find_core == smiles
+    assert rxn.find_core() == smiles
 
     # Match radius is to small.
     smiles = '>>'.join([
@@ -69,14 +69,14 @@ def test_find_core():
         'CC1=COCCC1C'
     ])
     rxn = Reaction(smiles)
-    assert rxn.find_core == smiles
+    assert rxn.find_core() == smiles
 
     smiles = '>>'.join([
         'O=CC1C=CCC=C1',
         'O=CC1=CCCC=C1'
     ])
     rxn = Reaction(smiles)
-    assert rxn.find_core == smiles
+    assert rxn.find_core() == smiles
 
 
 def test_make_ec_map():
