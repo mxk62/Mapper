@@ -28,10 +28,10 @@ class Reaction:
         old_product_ecs = []
         while True:
             # Assign initial EC values to the reactant and the product.
-            reactant_ecs = self.reactant.calc_init_ecs(index_type='funatsu')
+            reactant_ecs = self.reactant.calc_init_ecs(index_type='shelley')
             self.reactant.update_ecs(reactant_ecs)
 
-            product_ecs = self.product.calc_init_ecs(index_type='funatsu')
+            product_ecs = self.product.calc_init_ecs(index_type='shelley')
             self.product.update_ecs(product_ecs)
 
             # Check if EC indices changed from the last iteration. If not,
