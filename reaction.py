@@ -24,7 +24,8 @@ class Reaction:
 
         Function uses the Lynch-Willet algorithm to detect the reaction center.
         """
-
+        old_reactant_ecs = []
+        old_product_ecs = []
         while True:
             # Assign initial EC values to the reactant and the product.
             reactant_ecs = self.reactant.calc_init_ecs(index_type='funatsu')
@@ -33,10 +34,13 @@ class Reaction:
             product_ecs = self.product.calc_init_ecs(index_type='funatsu')
             self.product.update_ecs(product_ecs)
 
-            print "Initial values:"
-            print reactant_ecs
-            print product_ecs
-            print
+            # Check if EC indices changed from the last iteration. If not,
+            # it means no atoms could be removed, terminate immediately.
+            if (reactant_ecs == old_reactant_ecs and
+                    product_ecs == old_product_ecs):
+                break
+            old_reactant_ecs = reactant_ecs
+            old_product_ecs = product_ecs
 
             # If there is no common indices, exit as there is nothing to do.
             if not set(reactant_ecs) & set(product_ecs):
