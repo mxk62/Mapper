@@ -128,7 +128,8 @@ class Chemical:
     def get_morgan_identifier(atom):
         """Calculates and returns an initial EC index of a given atom.
 
-        After Morgan ... the values is just number of nonhydrogen neighbours.
+        After Morgan in J. Chem. Doc. 5, 107 (1965), the values is just number
+        of nonhydrogen neighbours.
         """
         return len(atom.GetNeighbors())
 
