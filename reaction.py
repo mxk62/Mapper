@@ -9,15 +9,12 @@ class Reaction:
 
     def __init__(self, smiles):
         self.reactant_smiles, self.product_smiles = smiles.split('>>')
-        try:
-            self.reactant = Chemical(self.reactant_smiles)
-        except ValueError:
-            raise ValueError("Invalid reactant SMILES")
-
-        try:
-            self.product = Chemical(self.product_smiles)
-        except ValueError:
-            raise ValueError("Invalid product SMILES")
+        self.reactant = Chemical(self.reactant_smiles)
+        if self.reactant is None:
+            raise ValueError('Invalid reactant SMILES')
+        self.product = Chemical(self.product_smiles)
+        if self.product is None:
+            raise ValueError('Invalid product SMILES')
 
     def find_core(self):
         """Extracts a reaction core.

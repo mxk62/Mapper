@@ -6,9 +6,8 @@ class Chemical:
     """A class representing a chemical substance."""
 
     def __init__(self, smiles):
-        try:
-            self.mol = Chem.MolFromSmiles(smiles)
-        except:
+        self.mol = Chem.MolFromSmiles(smiles)
+        if self.mol is None:
             raise ValueError('Invalid chemical SMILES.')
         self.smiles = Chem.MolToSmiles(self.mol)
         self.adjacency_matrix = Chem.GetAdjacencyMatrix(self.mol)
