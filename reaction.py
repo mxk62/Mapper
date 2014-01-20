@@ -71,21 +71,6 @@ class Reaction:
                 self.reactant.update_ecs(test_reactant_ecs)
                 self.product.update_ecs(test_product_ecs)
 
-            print 'Mappings (match radius: {0}):'.format(test_ec_order - 2)
-            for ec in set(self.reactant.ec_indices) & set(self.product.ec_indices):
-                r_map = [i for i, v in enumerate(self.reactant.ec_indices)
-                         if v == ec]
-                p_map = [i for i, v in enumerate(self.product.ec_indices)
-                         if v == ec]
-
-                r_atoms = [self.reactant.mol.GetAtomWithIdx(i).GetSymbol()
-                           for i in r_map]
-                p_atoms = [self.product.mol.GetAtomWithIdx(i).GetSymbol()
-                           for i in p_map]
-                print ec, ':', r_map, '<-->', p_map, ';', \
-                    r_atoms, '<-->', p_atoms
-
-
             # Find out EC-based maximal common substructure (EC-MCS).
             #
             # (1) Create maps between EC and atom indices for both product and
@@ -154,10 +139,6 @@ class Reaction:
             self.reactant.clear_ecs()
             self.product.clear_ecs()
 
-            print '>>'.join([Chem.MolToSmiles(self.reactant.mol),
-                             Chem.MolToSmiles(self.product.mol)])
-            print
-
         return '>>'.join([Chem.MolToSmiles(self.reactant.mol),
                           Chem.MolToSmiles(self.product.mol)])
 
@@ -176,7 +157,7 @@ class Reaction:
 
 if __name__ == '__main__':
     # Initial example from paper by Lynch and Willett. Output should read
-    #     CC(=O)N>>CC#N
+    #     C(=O)N>>C#N
     smiles = 'CC(=O)CC(C)C(CC#N)C(=O)N>>CC(=O)CC(C)C(CC#N)C#N'
     rxn = Reaction(smiles)
     print rxn.find_core()
