@@ -32,7 +32,7 @@ class Reaction:
             self.product.update_ecs(product_ecs)
 
             # Check if EC indices changed from the last iteration. If not,
-            # it means no atoms could be removed, terminate immediately.
+            # it means no atoms could be removed, thus terminate immediately.
             if (reactant_ecs == old_reactant_ecs and
                     product_ecs == old_product_ecs):
                 break
@@ -62,7 +62,7 @@ class Reaction:
                 test_ec_order += 1
 
                 common_ecs = set(test_reactant_ecs) & set(test_product_ecs)
-                if not common_ecs or test_ec_order == size_limit:
+                if not common_ecs or test_ec_order >= size_limit:
                     break
 
                 self.reactant.update_ecs(test_reactant_ecs)
