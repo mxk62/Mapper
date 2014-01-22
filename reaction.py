@@ -68,6 +68,26 @@ class Reaction:
                 self.reactant.update_ecs(test_reactant_ecs)
                 self.product.update_ecs(test_product_ecs)
 
+            print 'Mappings (match radius: {0}):'.format(test_ec_order - 2)
+            common_ecs = set(self.reactant.ec_indices) & set(self.product.ec_indices):
+            for ec in common_ecs:
+                r_indices = [i + 1
+                             for i, v in enumerate(self.reactant.ec_indices)
+                             if v == ec]
+                p_indices = [i + 1
+                             for i, v in enumerate(self.product.ec_indices)
+                             if v == ec]
+                r_atoms = [self.reactant.mol.GetAtomWithIdx(i - 1).GetSymbol()
+                           for i in r_indices]
+                p_atoms = [self.product.mol.GetAtomWithIdx(i - 1).GetSymbol()
+                           for i in p_indices]
+
+                r_map = ', '.join(['{0}:{1}'.format(*pair)
+                                   for pair in zip(r_atoms, r_indices)])
+                p_map = ', '.join(['{0}:{1}'.format(*pair)
+                                   for pair in zip(p_atoms, p_indices)])
+                print ec, ':', r_map, '<-->', p_map
+
             # Find out EC-based maximal common substructure (EC-MCS).
             #
             # (1) Create maps between EC and atom indices for both product and
