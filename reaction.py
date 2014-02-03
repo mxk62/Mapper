@@ -54,7 +54,8 @@ class Reaction:
             size_limit = min(len(reactant_ecs), len(product_ecs))
 
             # Calculate higher order ECs until there are NO pairs of atoms for
-            # which $EC_{r_{i}}^{n} = EC_{p_{j}}^{n}$.
+            # which $EC_{r_{i}}^{n} = EC_{p_{j}}^{n}$ or EC order exceeds
+            # the limit.
             test_ec_order = self.reactant.ec_order
             while True:
                 test_reactant_ecs = self.reactant.calc_next_ecs()
@@ -68,32 +69,14 @@ class Reaction:
                 self.reactant.update_ecs(test_reactant_ecs)
                 self.product.update_ecs(test_product_ecs)
 
-            print 'Mappings (match radius: {0}):'.format(test_ec_order - 2)
-            common_ecs = set(self.reactant.ec_indices) & set(self.product.ec_indices):
-            for ec in common_ecs:
-                r_indices = [i + 1
-                             for i, v in enumerate(self.reactant.ec_indices)
-                             if v == ec]
-                p_indices = [i + 1
-                             for i, v in enumerate(self.product.ec_indices)
-                             if v == ec]
-                r_atoms = [self.reactant.mol.GetAtomWithIdx(i - 1).GetSymbol()
-                           for i in r_indices]
-                p_atoms = [self.product.mol.GetAtomWithIdx(i - 1).GetSymbol()
-                           for i in p_indices]
-
-                r_map = ', '.join(['{0}:{1}'.format(*pair)
-                                   for pair in zip(r_atoms, r_indices)])
-                p_map = ', '.join(['{0}:{1}'.format(*pair)
-                                   for pair in zip(p_atoms, p_indices)])
-                print ec, ':', r_map, '<-->', p_map
-
             # Find out EC-based maximal common substructure (EC-MCS).
             #
             # (1) Create maps between EC and atom indices for both product and
-            # reactant.
+            # reactant and find EC indices common to both the reactant and
+            # the product.
             reactant_map = self.make_ec_map(self.reactant.ec_indices)
             product_map = self.make_ec_map(self.product.ec_indices)
+            common_ecs = set(reactant_map) & set(product_map)
 
             # (2) For all atoms sharing the same EC indices, find atoms
             # belonging to a circular substructure of the match radius
@@ -101,17 +84,19 @@ class Reaction:
             # centered on those atoms, i.e. EC-MCS.
             rad = test_ec_order - 2
 
-            # According to Lynch and Willett, allowing match radius smaller
+            print 'Mappings (match radius: {0}):'.format(test_ec_order - 2)
+            self.show_mappings(common_ecs)
+
+            # According to Lynch and Willett, allowing match  radius smaller
             # than 2 bonds significantly increases the number of incorrect
-            # results. Thus, we are skipping finding the EC-MCS and
-            # terminating the procedure in such a case.
+            # results. Thus, we are skipping finding the EC-MCS and terminating
+            # the procedure in such a case.
             if rad < 2:
                 break
 
             reactant_ec_mcs = set([])
             product_ec_mcs = set([])
-            for ec in set(reactant_map) & set(product_map):
-
+            for ec in common_ecs:
                 # If a given EC value corresponds to multiple atoms,
                 # check their equivalence, i.e. all reactant atoms are
                 # equivalent one to each other as well as to the product set.
@@ -123,18 +108,6 @@ class Reaction:
                 if (len(reactant_classes) != 1 or len(product_classes) != 1 or
                         reactant_classes != product_classes):
                     continue
-
-                # If there are multiple equivalents, make an arbitrary
-                # assignment for each member and find relevant EC-MCSes.
-                #
-                # Here, we are assigning successive reactant atoms to
-                # successive product atoms until all possible assignments
-                # are made, i.e whichever list ends first.
-                #threshold = min(len(reactant_map[ec]), len(product_map[ec]))
-                #for idx in reactant_map[ec][:threshold]:
-                #    reactant_ec_mcs.update(self.reactant.find_ec_mcs(idx,
-                # rad))
-                #for idx in product_map[ec][:threshold]:
 
                 # Proceed to next EC index, if mapping is ambiguous.
                 if len(reactant_map[ec]) != len(product_map[ec]):
@@ -158,6 +131,24 @@ class Reaction:
 
         return '>>'.join([Chem.MolToSmiles(self.reactant.mol),
                           Chem.MolToSmiles(self.product.mol)])
+
+    def show_mappings(self, common_ecs):
+        """Prints out all atom mappings."""
+        for ec in common_ecs:
+            lhs = ', '.join(['{0}:{1}'.format(*pair)
+                             for pair in self._map_symbols(self.reactant, ec)])
+            rhs = ', '.join(['{0}:{1}'.format(*pair)
+                             for pair in self._map_symbols(self.product, ec)])
+            print ec, ': ', lhs, '<-->', rhs
+
+    @staticmethod
+    def _map_symbols(chem, ec):
+        """Returns pairs of atom symbols and their molecular indices."""
+        indices = [chem.mol.GetAtomWithIdx(i).GetProp('initIdx')
+                   for i, v in enumerate(chem.ec_indices) if v == ec]
+        symbols = [chem.mol.GetAtomWithIdx(i).GetSymbol()
+                   for i, v in enumerate(chem.ec_indices) if v == ec]
+        return zip(symbols, indices)
 
     @staticmethod
     def make_ec_map(ecs):
