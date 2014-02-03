@@ -9,6 +9,10 @@ class Chemical:
         self.mol = Chem.MolFromSmiles(smiles)
         if self.mol is None:
             raise ValueError('Invalid chemical SMILES.')
+
+        # To ensure we are always dealing with a canonical SMILES, we are
+        # getting it by converting the molecule back, instead of just using the
+        # supplied string.
         self.smiles = Chem.MolToSmiles(self.mol)
         self.adjacency_matrix = Chem.GetAdjacencyMatrix(self.mol)
         self.distance_matrix = Chem.GetDistanceMatrix(self.mol)
