@@ -106,7 +106,8 @@ class Chemical:
 
         The atom's $n$-order EC index may be treated as a hash of a circular
         substructure with a radius $(n - 2)$ bonds. Function returns indices of
-        ALL atoms lying within.
+        all atoms lying WITHIN, i.e. atoms separated by at most $r - 1$ bonds
+        from the center atom.
         """
         return [idx for idx, dist in enumerate(self.distance_matrix[index])
                 if dist < radius]
