@@ -14,6 +14,14 @@ class Chemical:
         # getting it by converting the molecule back, instead of just using the
         # supplied string.
         self.smiles = Chem.MolToSmiles(self.mol)
+
+        # Save the values of initial indices (within the molecule) on
+        # respective atoms; mainly for debugging purposes. Note that those
+        # values are deliberately off by one.
+        for a in self.mol.GetAtoms():
+            a.SetProp('initIdx', str(a.GetIdx() + 1))
+
+        # Get underlying graph matrices.
         self.adjacency_matrix = Chem.GetAdjacencyMatrix(self.mol)
         self.distance_matrix = Chem.GetDistanceMatrix(self.mol)
 
