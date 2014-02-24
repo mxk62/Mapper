@@ -1,0 +1,31 @@
+# Example reactions and their cores from paper by Lynch and Willett in J. Chem. Inf. Comput. Sci 18, 154 (1978). 
+#
+# Working as expected.
+1	CC(=O)CC(C)C(CC#N)C(=O)N>>CC(=O)CC(C)C(CC#N)C#N	NC=O>>C#N
+2	CCOC(=O)C1CC(C)C(CC(F)(F)C(F)(F)C(F)(F)F)C1>>OC(=O)C1CC(C)C(CC(F)(F)C(F)(F)C(F)(F)F)C1	N/A
+3	COC(=O)C1=C(c2ccccc2)C(=O)C(c2ccccc2)=C1Cc1ccccc1>>COC(=O)C1=C(Cc2ccccc2)C(c2ccccc2)C(=O)C1c1ccccc1	N/A
+4	NC(=O)C(NS(=O)(=O)c1ccccc1)(c1ccccc1)c1ccccc1>>O=C(O)C(NS(=O)(=O)c1ccccc1)(c1ccccc1)c1ccccc1	NC=O>>OC=O
+5a	CCC(c1cc(OC)c(OC(C)=O)cc1Cc1ccc(OC(C)=O)c(OC)c1)C(C)OC(C)=O>>CCC(c1cc(OC)c(OC(C)=O)cc1C(=O)c1ccc(OC(C)=O)c(OC)c1)C(C)OC(C)=O	cCc>>cC(c)=O
+5b	ON(O)c1ccccc1S(=O)(=O)N(C)c1ccccc1>>Nc1ccccc1S(=O)(=O)N(C)c1ccccc1	cN(O)(O)>>cN
+5c	COc1ccc2c(c1)sc1c2CCC2C1=CCC2O>>COc1ccc2c(c1)sc1c2CCC2C1CCC2O	C=CC>>CCC
+5d	CC12CCC3C(CCC4Cc5nc6ccccc6cc5CC43)C1CCC2O>>CC12CCC3C(CCC4Cc5nc6ccccc6cc5CC43)C1CCC2=O	CCC(O)CC>>CCC(=O)CC
+
+# Ambiguous mappings.
+#
+# RDKit (v. 2013_09_1) has some problems with the SMILES of reaction 6a, so caution is advised.
+6a	c1ccc2c(c1)C=Cc1ccccc1NN2>>c1ccc2c(c1)C=Cc1ccccc1N(C)N2	c1ccc2c(c1)C=Cc1ccccc1NN2>>c1ccc2c(c1)C=Cc1ccccc1N(C)N2
+6b	N=C1ON=C2CCCCC12>>NC1ON=C2C=1CCCC2	N=C1ON=C2CCCCC12>>NC1ON=C2C=1CCCC2
+
+# Too small molecules.
+7a	C(C)(C)(O)C1CCCO1>>CC1=COCCC1C	CC(C)(O)C1CCCO1>>CC1=COCCC1C
+7b	O=CC1C=CCC=C1>>O=CC1=CCCC=C1 O=CC1C=CCC=C1>>O=CC1=CCCC=C1
+
+# Violates assumptions that equal EC indices corresponds to identical substructures.
+8	C=CCOC1=C(C)C(c2ccc3cc(OC)ccc3c2)CC1>>C=CCC1(C)C(=O)CCC1(C)c1ccc2cc(OC)ccc2c1	COC1=C(C)C(c)CC1>>O=C1C(C)(C)C(C)(c)CC1
+9	O=C1C(C)=CC(C)=C(C)C1(C)CC=C>>C=CCC1(C)C=C(C)C(=O)C(C)=C1C	N/A
+10	CCC1(CC)c2ccccc2N=C1C>>CCC1=Nc2ccccc2C1(C)CC	C.C>>C.C
+11	COc1ccc(C(=O)C(CCc2cccc(OC)c2)C2CCCC2)cc1>>C1CCCC1C(C(=O)c1ccc(O)cc1)CCc1ccc(OC)cc1	COc1ccccc1>>cc(c)O
+12	CCC(OC(=O)c1ccccc1)C(Br)CCCCBr>>CCC(OC(=O)c1ccccc1)CCCCCBr	CCBr.CBr>>C.CC
+13	CC(=O)NNC(O)c1c2c(sc=1N)CCC2>>CC(=O)Nc1sc2c(c=1C(O)NN)CCC2	cN.NN>>cN.NN
+14	CN1C=C(C(=O)O)C(Cc2ccccc2)C1=O>>COC(=O)C1=CC(Cc2ccccc2)C(=O)N1C	O=CO>>COC
+15	COC(=O)C(=O)C1CC2(C)CCCCC2CC1=O>>COC(=O)C1CC2(C)CCCCC2CC1=O	CC=O>>C=O
