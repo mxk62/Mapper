@@ -1,5 +1,5 @@
 import os
-from reaction import Reaction
+from mapper.reaction import Reaction
 
 
 while True:
