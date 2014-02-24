@@ -85,6 +85,17 @@ class Chemical:
             self.ec_order += 1
         self.ec_indices = ecs
 
+    def find_ec_mcs(self, index, radius):
+        """Returns indices of all atoms belonging to a given EC-MCS.
+
+        The atom's $n$-order EC index may be treated as a hash of a circular
+        substructure with a radius $(n - 2)$ bonds. Function returns indices of
+        all atoms lying WITHIN, i.e. atoms separated by at most $r - 1$ bonds
+        from the center atom.
+        """
+        return [idx for idx, dist in enumerate(self.distance_matrix[index])
+                if dist < radius]
+
     def remove_atoms(self, indices):
         """Removes atoms with given indices.
 
@@ -100,17 +111,6 @@ class Chemical:
         self.adjacency_matrix = Chem.GetAdjacencyMatrix(self.mol)
         self.distance_matrix = Chem.GetDistanceMatrix(self.mol)
         self.smiles = Chem.MolToSmiles(self.mol)
-
-    def find_ec_mcs(self, index, radius):
-        """Returns indices of all atoms belonging to a given EC-MCS.
-
-        The atom's $n$-order EC index may be treated as a hash of a circular
-        substructure with a radius $(n - 2)$ bonds. Function returns indices of
-        all atoms lying WITHIN, i.e. atoms separated by at most $r - 1$ bonds
-        from the center atom.
-        """
-        return [idx for idx, dist in enumerate(self.distance_matrix[index])
-                if dist < radius]
 
     def get_atom_classes(self, atom_indices):
         """Returns a set representing atoms' classes.
