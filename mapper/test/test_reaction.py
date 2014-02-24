@@ -1,4 +1,4 @@
-from reaction import Reaction
+from ..reaction import Reaction
 
 
 def test_find_core():

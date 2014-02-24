@@ -1,4 +1,4 @@
-from chemical import Chemical
+from ..chemical import Chemical
 
 
 def test_clear_ecs():
