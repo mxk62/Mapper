@@ -7,7 +7,7 @@ from chemical import Chemical
 class Reaction:
     """A class representing a chemical reaction."""
 
-    def __init__(self, smiles):
+    def __init__(self, smiles, verbose=False):
         self.reactant_smiles, self.product_smiles = smiles.split('>>')
         self.reactant = Chemical(self.reactant_smiles)
         if self.reactant is None:
@@ -15,6 +15,7 @@ class Reaction:
         self.product = Chemical(self.product_smiles)
         if self.product is None:
             raise ValueError('Invalid product SMILES')
+        self.verbose = verbose
 
     def find_core(self):
         """Extracts a reaction core.
@@ -84,8 +85,9 @@ class Reaction:
             # centered on those atoms, i.e. EC-MCS.
             rad = test_ec_order - 2
 
-            print 'Mappings (match radius: {0}):'.format(test_ec_order - 2)
-            self.show_mappings(common_ecs)
+            if self.verbose:
+                print 'Mappings (match radius: {0}):'.format(test_ec_order - 2)
+                self.show_mappings(common_ecs)
 
             # According to Lynch and Willett, allowing match  radius smaller
             # than 2 bonds significantly increases the number of incorrect

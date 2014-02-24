@@ -8,7 +8,7 @@ while True:
     if smiles == '':
         break
     print 'Processing...'
-    rxn = Reaction(smiles)
+    rxn = Reaction(smiles, verbose=True)
     core = rxn.find_core()
     print
     print 'Reaction core:', core
