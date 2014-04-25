@@ -4,8 +4,9 @@ from rdkit import Chem
 
 class Chemical:
     """A class representing a chemical substance."""
+    multipliers = {'lynch-willet': 2, 'funatsu': 4}
 
-    def __init__(self, smiles):
+    def __init__(self, smiles, ec_type='funatsu'):
         self.mol = Chem.MolFromSmiles(smiles)
         if self.mol is None:
             raise ValueError('Invalid chemical SMILES.')
@@ -24,6 +25,7 @@ class Chemical:
         # Get underlying graph matrices.
         self.adjacency_matrix = Chem.GetAdjacencyMatrix(self.mol)
         self.distance_matrix = Chem.GetDistanceMatrix(self.mol)
+        self.connectivity_matrix = self.get_acm(self.mol)
 
         # Attributes for handling extended connectivity (EC) indices.
         # Variable 'ec_order' is rather self-explanatory. It is worth noting
@@ -32,6 +34,7 @@ class Chemical:
         # the first atom; the same should hold for the second and so on.
         self.ec_order = None
         self.ec_indices = []
+        self.multi = multipliers.getdefault(ec_type, 2)
 
     def calc_init_ecs(self, index_type='funatsu'):
         """Calculates and returns a tuple representing initial EC indices.
@@ -52,11 +55,13 @@ class Chemical:
         """Calculates and returns a tuple representing next EC indices.
 
         Function calculates next order EC indices for molecule's atom.
-        The indices are incremented according to Lynch-Willet formula, i.e.
+        The indices are incremented according to the formula
         \[
-            EC_{i}^{n} = 2 * EC_{i}^{n - 1} + \sum_{j} EC_{j}^{n - 1},
+            EC_{i}^{n} = m * EC_{i}^{n - 1} + \sum_{j} EC_{j}^{n - 1},
         \]
-        where the summation goes over atoms adjacent to atom $i$.
+        where $m$ is method depenendent multiplier (4 for 'funatsu',
+        2 otherwise) and the summation goes over atoms adjacent to  atom
+        $i$.
 
         It returns a tuple in which the $i$-th element represent the EC index
         of the corresponding atom. It does NOT updates their values on atoms.
@@ -70,7 +75,7 @@ class Chemical:
         # Calculate and return higher order EC indices using Lynch-Willett
         # formula.
         ecs = numpy.array(self.ec_indices)
-        return tuple(2 * ecs + numpy.dot(self.adjacency_matrix, ecs))
+        return tuple(self.multi * ecs + numpy.dot(self.adjacency_matrix, ecs))
 
     def clear_ecs(self):
         """Clear EC indices from molecule's atoms."""
@@ -165,6 +170,21 @@ class Chemical:
         valence = sum([int(b.GetValenceContrib(atom))
                        for b in atom.GetBonds()])
         return 10 * valence + idx
+
+    @staticmethod
+    def get_acm(mol):
+        """Returns atom connectivity matrix of a molecule.
+
+        Atom connectivity matrix is a weighted adjacency matrix which
+        diagonal elements indicates atom's atomic number and non-zero
+        off-diagonal elements denotes bond order.
+        """
+        matrix = numpy.zeros[(len(mol.GetAtoms()), len(mol.GetAtoms()))]
+        for i, a in enumerate(mol.GetAtoms()):
+            matrix[i][i] = a.GetAtomicNum()
+            for j in [a.GetIdx() for a in a.GetNeighbors()]:
+                matrix[i][j] = mol.GetBondBetweenAtoms(i, j).GetBondType()
+        return matrix
 
 
 if __name__ == '__main__':
