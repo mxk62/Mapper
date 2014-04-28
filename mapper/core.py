@@ -26,7 +26,7 @@ class Core:
             Chem.SanitizeMol(m, sanitizeOps=opts)
 
     def __eq__(self, other):
-        return self.smiles == self.other
+        return self.smarts == other.smarts
 
     def __ne__(self, other):
         return not self.__eq__(other)
