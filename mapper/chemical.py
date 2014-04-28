@@ -34,7 +34,7 @@ class Chemical:
         # the first atom; the same should hold for the second and so on.
         self.ec_order = None
         self.ec_indices = []
-        self.multi = multipliers.getdefault(ec_type, 2)
+        self.multi = Chemical.multipliers.get(ec_type, 2)
 
     def calc_init_ecs(self, index_type='funatsu'):
         """Calculates and returns a tuple representing initial EC indices.
@@ -179,7 +179,7 @@ class Chemical:
         diagonal elements indicates atom's atomic number and non-zero
         off-diagonal elements denotes bond order.
         """
-        matrix = numpy.zeros[(len(mol.GetAtoms()), len(mol.GetAtoms()))]
+        matrix = numpy.zeros((len(mol.GetAtoms()), len(mol.GetAtoms())))
         for i, a in enumerate(mol.GetAtoms()):
             matrix[i][i] = a.GetAtomicNum()
             for j in [a.GetIdx() for a in a.GetNeighbors()]:
