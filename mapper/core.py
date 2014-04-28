@@ -8,9 +8,31 @@ import mapper as mp
 
 
 class Core:
-    """Represents a reaction core."""
+    """Represents a reaction core.
+
+    Reaction center indicates bond(s) broken or formed during the reaction.
+    Reaction core represents substructure (bonds *and* atoms) associated with
+    the reaction center.
+    """
 
     def __init__(self, smarts):
+        """Initializes a reaction core.
+
+        Parameters
+        ----------
+        smarts : reaction core SMARTS
+            Reaction core encoded using Daylight SMARTS notation.
+
+        Examples
+        --------
+        >>> c = mp.Core('[C:1][O:2]>>[C:1]=[O:2]')
+
+        Cores represent *patterns* but can be also view as *objects*
+        (molecular fragments), thus
+
+        >>> all(m.HasSubstruct(p) for m, p in zip(c.reactants, c.retrons))
+        True
+        """
         self.smarts = smarts
 
         frags = [frag.split('.') for frag in smarts.split('>>')]
