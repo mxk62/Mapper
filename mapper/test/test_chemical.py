@@ -55,7 +55,7 @@ def test_calc_init_ecs():
 
     # A simple linear molecule, Shelley-Munk method.
     chem = Chemical('CCO')
-    correct_indices = (21, 22, 41)
+    correct_indices = (12, 22, 14)
     assert chem.ec_order is None and not chem.ec_indices and \
         chem.calc_init_ecs(index_type='shelley') == correct_indices
 
@@ -80,19 +80,28 @@ def test_calc_next_ecs():
     'ec_indices' should retain whatever values they had before calling it.
     """
 
-    # A simple linear molecule with' uninitialized indices.
+    # A simple linear molecule with' uninitialized indices (will default to
+    # Funatsu method).
     chem = Chemical('CCO')
-    correct_indices = (184, 266, 224)
+    correct_indices = (306, 390, 386)
     assert chem.ec_order is None and not chem.ec_indices and \
         chem.calc_next_ecs() == correct_indices
 
     # A simple linear molecule with initialized with Morgan method.
-    chem = Chemical('CCO')
+    chem = Chemical('CCO', ec_type='morgan')
     chem.ec_order = 1
     chem.ec_indices = (1, 2, 1)
     correct_indices = (4, 6, 4)
     assert chem.ec_order == 1 and chem.ec_indices == (1, 2, 1) and \
-           chem.calc_next_ecs() == correct_indices
+        chem.calc_next_ecs() == correct_indices
+
+    # A simple linear molecule with initialized with Shelley-Munk method.
+    chem = Chemical('CCO', ec_type='shelley')
+    chem.ec_order = 1
+    chem.ec_indices = (12, 22, 14)
+    correct_indices = (46, 70, 50)
+    assert chem.ec_order == 1 and chem.ec_indices == (12, 22, 14) and \
+        chem.calc_next_ecs() == correct_indices
 
 
 def test_remove_atoms():
