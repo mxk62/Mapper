@@ -57,7 +57,7 @@ class Core:
         return hash(self.smarts)
 
     def does_contain(self, other):
-        """Returns True if contains core.
+        """Returns True if
 
         Parameters
         ----------
@@ -103,9 +103,8 @@ class Core:
         """
         if len(self.reactants) != len(other.retrons):
             return False
-        mols = itertools.permutations(self.reactants)
-        patterns = itertools.permutations(other.retrons)
-        for mols, patterns in zip(mols, patterns):
-            if all(m.HasSubstruct(p) for m, p in zip(mols, patterns)):
+        for mols in itertools.permutations(self.reactants):
+            if all(m.HasSubstructMatch(p)
+                   for m, p in zip(mols, other.retrons)):
                 return True
         return False
