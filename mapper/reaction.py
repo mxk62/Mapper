@@ -1,7 +1,7 @@
 """Implementation of Lynch-Willet algorithm."""
 
 from rdkit import Chem
-from chemical import Chemical
+from mapper import Chemical
 
 
 class Reaction:

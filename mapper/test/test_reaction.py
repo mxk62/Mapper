@@ -1,4 +1,4 @@
-from ..reaction import Reaction
+from mapper import Reaction
 
 
 def test_find_core():
