@@ -42,21 +42,27 @@ class Core:
         if None in self.retrons + self.synthons:
             raise ValueError('erroneous core SMARTS')
 
-        self.reactants, self.products = \
+        reactants, products = \
             [[Chem.MolFromSmiles(smi, sanitize=False) for smi in smis]
              for smis in frags]
+        self.reactants = self._strip(reactants)
+        self.products = self._strip(products)
         opts = SanitizeFlags.SANITIZE_ALL ^ SanitizeFlags.SANITIZE_KEKULIZE
         for m in self.reactants + self.products:
             Chem.SanitizeMol(m, sanitizeOps=opts)
+        self.smiles = '>>'.join([
+            '.'.join([Chem.MolToSmiles(m) for m in self.reactants]),
+            '.'.join([Chem.MolToSmiles(m) for m in self.products])
+        ])
 
     def __eq__(self, other):
-        return self.smarts == other.smarts
+        return self.smiles == other.smiles
 
     def __ne__(self, other):
         return not self.__eq__(other)
 
     def __hash__(self):
-        return hash(self.smarts)
+        return hash(self.smiles)
 
     def does_contain(self, other):
         """Returns True if
@@ -110,3 +116,29 @@ class Core:
                    for m, p in zip(mols, other.retrons)):
                 return True
         return False
+
+    def _strip(self, mols):
+        """Strips reactants off unwanted parts."""
+        return self._strip_map(self._strip_env(mols))
+
+    @staticmethod
+    def _strip_env(mols):
+        """Removes unmapped atoms."""
+        for m in mols:
+            indices = [a.GetIdx() for a in m.GetAtoms()
+                       if not a.HasProp('molAtomMapNumber')]
+
+            e = Chem.EditableMol(m)
+            for i in sorted(indices, reverse=True):
+                e.RemoveAtom(i)
+
+            m = e.GetMol()
+        return mols
+
+    @staticmethod
+    def _strip_map(mols):
+        """Removes atoms map numbers."""
+        for m in mols:
+            [a.ClearProp('molAtomMapNumber')
+             for a in m.GetAtoms() if a.HasProp('molAtomMapNumber')]
+        return mols
