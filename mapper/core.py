@@ -39,6 +39,8 @@ class Core:
 
         self.retrons, self.synthons = \
             [[Chem.MolFromSmarts(smi) for smi in smis] for smis in frags]
+        if None in self.retrons + self.synthons:
+            raise ValueError('erroneous core SMARTS')
 
         self.reactants, self.products = \
             [[Chem.MolFromSmiles(smi, sanitize=False) for smi in smis]
