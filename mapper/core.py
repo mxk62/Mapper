@@ -56,11 +56,11 @@ class Core:
         reactants, products = \
             [[Chem.MolFromSmiles(smi, sanitize=False) for smi in smis]
              for smis in frags]
-        self.reactants = self._strip(reactants)
-        self.products = self._strip(products)
         opts = SanitizeFlags.SANITIZE_ALL ^ SanitizeFlags.SANITIZE_KEKULIZE
-        for m in self.reactants + self.products:
+        for m in reactants + products:
             Chem.SanitizeMol(m, sanitizeOps=opts)
+        self.reactants = self._strip_map(reactants)
+        self.products = self._strip_map(products)
         self.smiles = '>>'.join([
             '.'.join([Chem.MolToSmiles(m) for m in self.reactants]),
             '.'.join([Chem.MolToSmiles(m) for m in self.products])
