@@ -20,17 +20,28 @@ class Core:
 
         Parameters
         ----------
-        smarts : reaction core SMARTS
+        smarts : string
             Reaction core encoded using Daylight SMARTS notation.
+
+
+        Raises
+        ------
+        ValueError
+            This exception is raised if the input SMARTS is invalid.
 
         Examples
         --------
         >>> c = mp.Core('[C:1][O:2]>>[C:1]=[O:2]')
 
-        Cores represent *patterns* but can be also view as *objects*
-        (molecular fragments), thus
+        Core parts represent *patterns* but can be also view as
+        *objects* (molecular fragments), thus
 
         >>> all(m.HasSubstruct(p) for m, p in zip(c.reactants, c.retrons))
+        True
+
+        The same holds for synthons too, e.g.
+
+        >>> all(m.HasSubstruct(p) for m, p in zip(c.products, c.synthons))
         True
         """
         self.smarts = smarts
@@ -64,18 +75,24 @@ class Core:
     def __hash__(self):
         return hash(self.smiles)
 
+    def __str__(self):
+        return self.smarts
+
     def does_contain(self, other):
-        """Returns True if
+        """Returns True if a core's retrons contains retrons of the other one.
+
+        A retron is considered to contain another one if the latter is the
+        substructure of the first one.
 
         Parameters
         ----------
-        other : another reaction core
+        other : Core
+            Another reaction core
 
         Examples
         --------
-        Core '[C:1][O:2]>>[C:1]=[O:2]' is considered to contain core
-        '[C:2]>>[C:2]Br' as the latter core's retron, '[C:2]', is
-        a substructure of '[C:1][O:2]'.
+        Core '[C:1][O:2]>>[C:1]=[O:2]' contain core '[C:2]>>[C:2]Br' as
+        the latter core's retron, '[C:2]', is a substructure of '[C:1][O:2]'.
 
         >>> core = mp.Core('[C:1][O:2]>>[C:1]=[O:2]')
         >>> other = mp.Core('[C:2]>>[C:2]Br')
@@ -83,7 +100,7 @@ class Core:
         True
 
         Conversely, it does not contain the core '[S:2]>>O=[S:2]=O' as the
-        the other core's retron cannot be a substructure of '[C:1][O:2]'.
+        retron '[S:2]' is not a substructure of '[C:1][O:2]'.
 
         >>> core = mp.Core('[C:1][O:2]>>[C:1]=[O:2]')
         >>> other = mp.Core('[S:2]>>O=[S:2]=O')
@@ -92,8 +109,8 @@ class Core:
 
         Core having multiple retrons is considered to contain other
         multiple-retron core if and only if:
-          1. number of retrons agrees between the cores;
-          2. for *any* ordering of the latter core's retrons, *simultanously*
+        1.   number of retrons agrees between the cores;
+        2.   for *any* ordering of the latter core's retrons, *simultanously*
              all of them are substructures of the former core's retrons.
         Thus
 
@@ -118,7 +135,10 @@ class Core:
         return False
 
     def _strip(self, mols):
-        """Strips reactants off unwanted parts."""
+        """Strips reactants off unwanted elements."""
+
+        # The order of operations is important here as stripping atom map
+        # numbers first will lead to total removal of the molecules.
         return self._strip_map(self._strip_env(mols))
 
     @staticmethod
