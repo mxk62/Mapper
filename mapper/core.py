@@ -4,7 +4,7 @@
 import itertools
 from rdkit import Chem
 from rdkit.Chem import SanitizeFlags
-import mapper as mp
+#import mapper as mp
 
 
 class Core:
@@ -22,7 +22,6 @@ class Core:
         ----------
         smarts : string
             Reaction core encoded using Daylight SMARTS notation.
-
 
         Raises
         ------
@@ -91,16 +90,17 @@ class Core:
 
         Examples
         --------
-        Core '[C:1][O:2]>>[C:1]=[O:2]' contain core '[C:2]>>[C:2]Br' as
-        the latter core's retron, '[C:2]', is a substructure of '[C:1][O:2]'.
+        Core ``[C:1][O:2]>>[C:1]=[O:2]`` contain core ``[C:2]>>[C:2]Br`` as
+        the latter core's retron, ``[C:2]``, is a substructure of
+        ``[C:1][O:2]``.
 
         >>> core = mp.Core('[C:1][O:2]>>[C:1]=[O:2]')
         >>> other = mp.Core('[C:2]>>[C:2]Br')
         >>> core.does_contain(other)
         True
 
-        Conversely, it does not contain the core '[S:2]>>O=[S:2]=O' as the
-        retron '[S:2]' is not a substructure of '[C:1][O:2]'.
+        Conversely, it does not contain the core ``[S:2]>>O=[S:2]=O`` as the
+        retron ``[S:2]`` is not a substructure of ``[C:1][O:2]``.
 
         >>> core = mp.Core('[C:1][O:2]>>[C:1]=[O:2]')
         >>> other = mp.Core('[S:2]>>O=[S:2]=O')
@@ -109,9 +109,9 @@ class Core:
 
         Core having multiple retrons is considered to contain other
         multiple-retron core if and only if:
-        1.   number of retrons agrees between the cores;
-        2.   for *any* ordering of the latter core's retrons, *simultanously*
-             all of them are substructures of the former core's retrons.
+        1. number of retrons agrees between the cores;
+        2. for *any* ordering of the latter core's retrons, *simultanously*
+           all of them are substructures of the former core's retrons.
         Thus
 
         >>> core = mp.Core('[C:4]O.[N:3][C:1]=[O:2]>>[C:4][O:2][C:1]=[N:3]')

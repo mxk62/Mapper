@@ -58,18 +58,23 @@ class Chemical:
         Parameters
         ----------
         index_type : string
-            Initial values of EC indices can be calculated using three
-            different methods called 'funatsu', 'shelley', and 'morgan'.
-            Defaults to 'funatsu'.
+            Initial values of EC indices can be calculated using different
+            methods:
+
+            - *funatsu*
+            - *shelley*
+            - *morgan*
+
+            Defaults to *funatsu*.
 
         Returns
         -------
         indices : tuple
-            A sequence in which the $i$-th element represent the EC
+            A sequence in which the :math:`i`-th element represent the EC
             index of the corresponding atom.
 
-            .. warning::
-            It does *not* update EC values on atoms.
+            .. warning:: It does *not* update EC values.
+
         """
         methods = {
             'funatsu': self.get_funatsu_identifier,
@@ -80,26 +85,25 @@ class Chemical:
         return tuple([get_identifier(a) for a in self.mol.GetAtoms()])
 
     def calc_next_ecs(self):
-        """Calculates next EC indices.
+        """Calculates next order EC indices.
 
         Function calculates next order EC indices for molecule's atom.
         The indices are incremented according to the formula
 
-        .. math::
-        EC_{i}^{n} = m * EC_{i}^{n - 1} + \sum_{j} EC_{j}^{n - 1},
+        .. math:: EC_{i}^{n} = m * EC_{i}^{n - 1} + \sum_{j} EC_{j}^{n - 1},
 
         where :math:`m` is method dependent multiplier (4 for 'funatsu',
         2 otherwise) and the summation goes over atoms adjacent to  atom
-        $i$.
+        :math:`i`.
 
         Returns
         -------
         indices : tuple
-            A sequence in which the $i$-th element represent the EC index
+            A sequence in which the :math:`i`-th element represent the EC index
             of the corresponding atom.
 
-            .. warning::
-            It does NOT updates their values on atoms.
+            .. warning:: It does NOT updates EC values.
+
         """
 
         # If EC indices were not initialized, do it now.
@@ -124,6 +128,7 @@ class Chemical:
         ----------
         ecs : sequence
             A sequence of integer representing atoms' EC indices.
+
         """
         if self.ec_order is None:
             self.ec_order = 1
@@ -186,6 +191,7 @@ class Chemical:
         -------
         classes : set
             A set of integers representing atoms' classes.
+
         """
         return set([self.get_shelley_identifier(self.mol.GetAtomWithIdx(i))
                     for i in atom_indices])
@@ -211,6 +217,7 @@ class Chemical:
         -------
         index : integer
             An integer representing initial EC index for a given atom.
+
         """
         return 10 * atom.GetAtomicNum() + len(atom.GetNeighbors())
 
@@ -230,6 +237,7 @@ class Chemical:
         -------
         index : integer
             An integer representing initial EC index for a given atom.
+
         """
         return len(atom.GetNeighbors())
 
@@ -253,6 +261,7 @@ class Chemical:
         -------
         index : integer
             An integer representing initial EC index for a given atom.
+
         """
 
         # Get atom's type. If not defined, revert to atomic number.
@@ -276,12 +285,13 @@ class Chemical:
         Parameters
         ----------
         mol : Molecule
-            A molecule for which
+            A molecule for which atom connectivity matrix is to be calculated.
 
         Returns
         -------
-        matrix : numpy array
+        matrix : array
             An array representing atom connectivity matrix.
+
         """
         matrix = numpy.zeros((len(mol.GetAtoms()), len(mol.GetAtoms())))
         for i, a in enumerate(mol.GetAtoms()):
