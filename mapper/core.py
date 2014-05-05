@@ -1,4 +1,9 @@
-"""Class representing reaction core."""
+"""Class representing reaction core.
+
+Reaction center indicates bond(s) broken or formed during the reaction.
+Reaction core represents substructure (bonds *and* atoms) associated with
+the reaction center.
+"""
 
 
 import itertools
@@ -8,12 +13,7 @@ from rdkit.Chem import SanitizeFlags
 
 
 class Core:
-    """Represents a reaction core.
-
-    Reaction center indicates bond(s) broken or formed during the reaction.
-    Reaction core represents substructure (bonds *and* atoms) associated with
-    the reaction center.
-    """
+    """Represents a reaction core."""
 
     def __init__(self, smarts):
         """Initializes a reaction core.
