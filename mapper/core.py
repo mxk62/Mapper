@@ -8,6 +8,7 @@ the reaction center.
 
 import itertools
 from rdkit import Chem
+from rdkit.Chem import MCS
 from rdkit.Chem import SanitizeFlags
 #import mapper as mp
 
@@ -133,6 +134,46 @@ class Core:
                    for m, p in zip(mols, other.retrons)):
                 return True
         return False
+
+    def find_similarity(self, other):
+        """Finds similarity distance between two molecular fragments.
+
+        Similarity distance of two molecules is a *metric* defined as
+
+        .. math:: d(m_{1}, m_{2}) = 1 -
+                      \frac{|\text{mcs}(m_{1}, m_{2}|}{\max(|m_{1}|, |m_{2}|)}
+
+        where :math:`|\ldots|` denotes number of atoms in a given molecule or
+        fragment.
+
+        For any molecules :math:`m_{1}`, :math:`$m_{2}` and :math:`m_{3}`,
+        the following properties hold true:
+        1.  :math:`0 \leq d(m_{1}, m_{2}) \le 1`,
+        2.  :math:`d(m_{1}, m_{2}) = 0` if and only if :math:`m_{1}` and
+            :math:`m_{2}` are identical,
+        3.  :math:`d(m_{1}, m_{2}) = d(m_{2}, m_{1})`,
+        4.  :math:`d(m_{1}, m_{3}) \leq d(m_{1}, m_{2}) + d(m_{2}, m_{3})`
+        """
+        distances = []
+        for mols in itertools.permutations(self.reactants):
+            d = 0
+            for idx, moli, molj in enumerate(zip(mols, other.reactants)):
+                moli_size = len(moli.GetAtoms())
+                molj_size = len(molj.GetAtoms())
+
+                mcs_size = 0
+                if len(moli.GetAtoms()) == 1 or len(molj.GetAtoms()) == 1:
+                    if (moli.HasSubstructMatch(other.retrons[idx]) or
+                            molj.HasSubstructMatch(self.retrons[idx])):
+                        mcs_size = 1
+                else:
+                    mcs = MCS.FindMCS([moli, molj])
+                    if mcs.numAtoms != -1:
+                        mcs_size = mcs.numAtoms
+
+                d += 1 - mcs_size / max(moli_size, len(molj_size))
+            distances.append(d)
+        return min(distances)
 
     def _strip(self, mols):
         """Strips reactants off unwanted elements."""
