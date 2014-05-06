@@ -165,7 +165,7 @@ class Core:
                 molj_size = len(molj.GetAtoms())
 
                 mcs_size = 0
-                if len(moli.GetAtoms()) == 1 or len(molj.GetAtoms()) == 1:
+                if moli_size == 1 or molj_size == 1:
                     if (moli.HasSubstructMatch(other.retrons[idx]) or
                             molj.HasSubstructMatch(self.retrons[idx])):
                         mcs_size = 1
