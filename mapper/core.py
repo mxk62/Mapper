@@ -160,7 +160,7 @@ class Core:
         distances = []
         for mols in itertools.permutations(self.reactants):
             d = 0
-            for idx, moli, molj in enumerate(zip(mols, other.reactants)):
+            for idx, (moli, molj) in enumerate(zip(mols, other.reactants)):
                 moli_size = len(moli.GetAtoms())
                 molj_size = len(molj.GetAtoms())
 
@@ -174,8 +174,8 @@ class Core:
                     if mcs.numAtoms != -1:
                         mcs_size = mcs.numAtoms
 
-                d += 1 - mcs_size / max(moli_size, len(molj_size))
-            distances.append(d)
+                d += 1.0 - float(mcs_size) / max(moli_size, molj_size)
+            distances.append(d / len(mols))
         return min(distances)
 
     def _strip(self, mols):
