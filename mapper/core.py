@@ -170,7 +170,7 @@ class Core:
                             molj.HasSubstructMatch(self.retrons[idx])):
                         mcs_size = 1
                 else:
-                    mcs = MCS.FindMCS([moli, molj])
+                    mcs = MCS.FindMCS([moli, molj], ringMatchesRingOnly=True)
                     if mcs.numAtoms != -1:
                         mcs_size = mcs.numAtoms
 
