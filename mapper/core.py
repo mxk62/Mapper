@@ -154,6 +154,9 @@ class Core:
         3.  :math:`d(m_{1}, m_{2}) = d(m_{2}, m_{1})`,
         4.  :math:`d(m_{1}, m_{3}) \leq d(m_{1}, m_{2}) + d(m_{2}, m_{3})`
         """
+        if len(self.reactants) != len(other.reactants):
+            return 1.0
+
         distances = []
         for mols in itertools.permutations(self.reactants):
             d = 0
