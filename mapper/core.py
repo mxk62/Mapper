@@ -135,7 +135,7 @@ class Core:
                 return True
         return False
 
-    def find_similarity(self, other):
+    def find_distance(self, other):
         """Finds similarity distance between two molecular fragments.
 
         Similarity distance of two molecules is a *metric* defined as
