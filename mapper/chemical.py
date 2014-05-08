@@ -74,7 +74,6 @@ class Chemical:
             index of the corresponding atom.
 
             .. warning:: It does *not* update EC values.
-
         """
         methods = {
             'funatsu': self.get_funatsu_identifier,
@@ -103,7 +102,6 @@ class Chemical:
             of the corresponding atom.
 
             .. warning:: It does NOT updates EC values.
-
         """
 
         # If EC indices were not initialized, do it now.
@@ -128,7 +126,6 @@ class Chemical:
         ----------
         ecs : sequence
             A sequence of integer representing atoms' EC indices.
-
         """
         if self.ec_order is None:
             self.ec_order = 1
@@ -191,7 +188,6 @@ class Chemical:
         -------
         classes : set
             A set of integers representing atoms' classes.
-
         """
         return set([self.get_shelley_identifier(self.mol.GetAtomWithIdx(i))
                     for i in atom_indices])
@@ -200,11 +196,11 @@ class Chemical:
     def get_funatsu_identifier(atom):
         """Calculates an initial EC index of a given atom.
 
-        After Funatsu et al. in Tetrahedron Computer Methodology 1,
-        53-69 (1988), the values are calculated according to formula
+        After Funatsu *et al.* in Tetrahedron Computer Methodology **1**,
+        53 (1988), the values are calculated according to formula
 
         .. math::
-        EC^{1}_{a_{i}} = 10 Z_{a_{i}} + \deg(a_{i})
+           EC^{1}_{a_{i}} = 10 Z_{a_{i}} + \deg(a_{i})
 
         where :math:`Z_{a_{i}}` is the atomic number of :math:`i`-th atom.
 
@@ -217,7 +213,6 @@ class Chemical:
         -------
         index : integer
             An integer representing initial EC index for a given atom.
-
         """
         return 10 * atom.GetAtomicNum() + len(atom.GetNeighbors())
 
@@ -225,8 +220,8 @@ class Chemical:
     def get_morgan_identifier(atom):
         """Calculates an initial EC index of a given atom.
 
-        After Morgan in J. Chem. Doc. 5, 107 (1965), the value is just number
-        of nonhydrogen neighbours.
+        After Morgan in J. Chem. Doc. **5**, 107 (1965), the value is just
+        number of nonhydrogen neighbours.
 
         Parameters
         ----------
@@ -237,7 +232,6 @@ class Chemical:
         -------
         index : integer
             An integer representing initial EC index for a given atom.
-
         """
         return len(atom.GetNeighbors())
 
@@ -245,7 +239,7 @@ class Chemical:
     def get_shelley_identifier(atom):
         """Calculates and returns an initial EC index of a given atom.
 
-        After Shelley and Munk in J. Chem. Inf. Com. Sci 17, 110 (1977),
+        After Shelley and Munk in J. Chem. Inf. Com. Sci. **17**, 110 (1977),
         the values are two-digit integer, the most significant of which
         specifies number of covalent (two-electrons) bonds by which it joins
         nonhydrogen atoms, and the least significant of which designates
@@ -261,7 +255,6 @@ class Chemical:
         -------
         index : integer
             An integer representing initial EC index for a given atom.
-
         """
 
         # Get atom's type. If not defined, revert to atomic number.
@@ -291,7 +284,6 @@ class Chemical:
         -------
         matrix : array
             An array representing atom connectivity matrix.
-
         """
         matrix = numpy.zeros((len(mol.GetAtoms()), len(mol.GetAtoms())))
         for i, a in enumerate(mol.GetAtoms()):

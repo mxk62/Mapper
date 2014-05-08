@@ -43,6 +43,7 @@ class Core:
 
         >>> all(m.HasSubstruct(p) for m, p in zip(c.products, c.synthons))
         True
+
         """
         self.smarts = smarts
 
@@ -110,9 +111,11 @@ class Core:
 
         Core having multiple retrons is considered to contain other
         multiple-retron core if and only if:
+
         1. number of retrons agrees between the cores;
         2. for *any* ordering of the latter core's retrons, *simultanously*
            all of them are substructures of the former core's retrons.
+
         Thus
 
         >>> core = mp.Core('[C:4]O.[N:3][C:1]=[O:2]>>[C:4][O:2][C:1]=[N:3]')
@@ -136,23 +139,25 @@ class Core:
         return False
 
     def find_distance(self, other):
-        """Finds similarity distance between two molecular fragments.
+        r"""Finds similarity distance between two molecular fragments.
 
         Similarity distance of two molecules is a *metric* defined as
 
-        .. math:: d(m_{1}, m_{2}) = 1 -
-                      \frac{|\text{mcs}(m_{1}, m_{2}|}{\max(|m_{1}|, |m_{2}|)}
+        .. math::
+           d(m_{1}, m_{2}) = 1 -
+             \frac{|\text{MCS}\{m_{1}, m_{2}\}|}{\max(|m_{1}|, |m_{2}|)}
 
         where :math:`|\ldots|` denotes number of atoms in a given molecule or
         fragment.
 
-        For any molecules :math:`m_{1}`, :math:`$m_{2}` and :math:`m_{3}`,
+        For any molecules :math:`m_{1}`, :math:`m_{2}` and :math:`m_{3}`,
         the following properties hold true:
-        1.  :math:`0 \leq d(m_{1}, m_{2}) \le 1`,
-        2.  :math:`d(m_{1}, m_{2}) = 0` if and only if :math:`m_{1}` and
-            :math:`m_{2}` are identical,
-        3.  :math:`d(m_{1}, m_{2}) = d(m_{2}, m_{1})`,
-        4.  :math:`d(m_{1}, m_{3}) \leq d(m_{1}, m_{2}) + d(m_{2}, m_{3})`
+
+        1. :math:`0 \leq d(m_{1}, m_{2}) \le 1`,
+        2. :math:`d(m_{1}, m_{2}) = 0` if and only if :math:`m_{1}` and
+           :math:`m_{2}` are identical,
+        3. :math:`d(m_{1}, m_{2}) = d(m_{2}, m_{1})`,
+        4. :math:`d(m_{1}, m_{3}) \leq d(m_{1}, m_{2}) + d(m_{2}, m_{3})`
         """
         if len(self.reactants) != len(other.reactants):
             return 1.0

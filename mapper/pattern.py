@@ -7,7 +7,7 @@ import re
 from rdkit import Chem
 from rdkit.Chem import MCS
 from rdkit.Chem import SanitizeFlags
-#import mapper as mp
+import mapper as mp
 
 
 class Pattern:
@@ -34,7 +34,6 @@ class Pattern:
 
         >>> all(m.HasSubstruct(p) for m, p in zip(p.fragments, p.templates))
         True
-
         """
         self.smarts = smarts
         self.smiles = self._strip_map(smarts)
@@ -92,10 +91,12 @@ class Pattern:
 
         Multi-fragment pattern is considered to contain other
         multiple-fragment pattern if and only if:
+
         1. number of fragements agrees in both patterns;
         2. for *any* ordering of the latter pattern's fragments,
            *simultaneously* all of them are substructures of the former
            pattern's fragments.
+
         Thus
 
         >>> patt = mp.Pattern('[C:4]O.[N:3][C:1]=[O:2]')
@@ -119,23 +120,48 @@ class Pattern:
         return False
 
     def find_distance(self, other):
-        """Finds similarity distance between two molecular patterns.
+        r"""Finds similarity distance between two molecular patterns.
 
-        Similarity distance of two molecules is a *metric* defined as
+        Similarity distance of two *connected* molecules :math:`m_{1}` and
+        :math:`m_{2}` is a metric defined as
 
-        .. math:: d(m_{1}, m_{2}) = 1 -
-                      \frac{|\text{mcs}(m_{1}, m_{2}|}{\max(|m_{1}|, |m_{2}|)}
+        .. math::
+           d(m_{1}, m_{2}) = 1 -
+             \frac{|\text{mcs}(m_{1}, m_{2}|}{\max(|m_{1}|, |m_{2}|)}
 
-        where :math:`|\ldots|` denotes number of atoms in a given molecule or
-        fragment.
+        where :math:`|\ldots|` denotes number of atoms in a given molecule.
 
-        For any molecules :math:`m_{1}`, :math:`$m_{2}` and :math:`m_{3}`,
+        For any molecules :math:`m_{1}`, :math:`m_{2}` and :math:`m_{3}`,
         the following properties hold true:
-        1.  :math:`0 \leq d(m_{1}, m_{2}) \le 1`,
-        2.  :math:`d(m_{1}, m_{2}) = 0` if and only if :math:`m_{1}` and
-            :math:`m_{2}` are identical,
-        3.  :math:`d(m_{1}, m_{2}) = d(m_{2}, m_{1})`,
-        4.  :math:`d(m_{1}, m_{3}) \leq d(m_{1}, m_{2}) + d(m_{2}, m_{3})`
+
+        1. :math:`0 \leq d(m_{1}, m_{2}) \le 1`,
+        2. :math:`d(m_{1}, m_{2}) = 0` if and only if :math:`m_{1}` and
+           :math:`m_{2}` are identical,
+        3. :math:`d(m_{1}, m_{2}) = d(m_{2}, m_{1})`,
+        4. :math:`d(m_{1}, m_{3}) \leq d(m_{1}, m_{2}) + d(m_{2}, m_{3})`
+
+        Function extends this concept to disconnected molecules :math:`M_{1} =
+        \{m_{1}^{1}, \ldots, m_{N}^{1}\}` and :math:`M_{2} = \{m_{1}^{2},
+        \ldots, m_{N}^{2}\}` for which
+
+        .. math::
+           D(M_{1}, M_{2}) =
+             \begin{cases}
+                \frac{1}{N} \sum_{i} d(m_{i}^{1}, m_{i}^{2}) &
+                   \text{if } \forall i \quad d(m_{i}^{1}, m_{i}^{2}) < 1, \\
+                   1 & \text{otherwise}.
+             \end{cases}
+
+        Parameters
+        ----------
+        other : Pattern
+            Another pattern
+
+        Returns
+        -------
+        distance : float
+            The smallest similarity distance between fragments of molecular
+            patterns.
         """
         if len(self.fragments) != len(other.fragments):
             return 1.0
@@ -164,7 +190,5 @@ class Pattern:
     @staticmethod
     def _strip_map(s):
         """Removes atoms map numbers."""
-
         tmp = re.sub(r'\[([^]]+?):(\d+)\]', r'[\1]', s)
         return re.sub(r'\[(B|b|C|c|N|n|O|o|P|S|s|F|Cl|Br|I)\]', r'\1', tmp)
-
