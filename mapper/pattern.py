@@ -166,25 +166,34 @@ class Pattern:
         if len(self.fragments) != len(other.fragments):
             return 1.0
 
+        # At them moment, the total distance for disjoint patterns is an
+        # arithmetic mean of distances between their fragments, unless
+        # any pair has no MCS. In such a case it is set to 1.
         distances = []
         for mols in itertools.permutations(self.fragments):
-            d = 0
-            for idx, (moli, molj) in enumerate(zip(mols, other.fragments)):
-                moli_size = len(moli.GetAtoms())
-                molj_size = len(molj.GetAtoms())
+            dfrag = []
+            for mi, mj in zip(mols, other.fragments):
+                mi_size, mj_size = len(mi.GetAtoms()), len(mj.GetAtoms())
 
+                # Strictly speaking, checking for subgraph isomorphism,
+                # and hence MCS algorithm, requires each of compared graphs
+                # to have at least two nodes. Thus, cases where any of
+                # the compared patterns consists of a single atom, are treated
+                # separately using substructure matching.
                 mcs_size = 0
-                if moli_size == 1 or molj_size == 1:
-                    if (moli.HasSubstructMatch(other.templates[idx]) or
-                            molj.HasSubstructMatch(self.templates[idx])):
-                        mcs_size = 1
-                else:
-                    mcs = MCS.FindMCS([moli, molj], ringMatchesRingOnly=True)
+                if min(mi_size, mj_size) != 1:
+                    mcs = MCS.FindMCS([mi, mj], ringMatchesRingOnly=True)
                     if mcs.numAtoms != -1:
                         mcs_size = mcs.numAtoms
-
-                d += 1.0 - float(mcs_size) / max(moli_size, molj_size)
-            distances.append(d / len(mols))
+                else:
+                    i, j = self.fragments.index(mi), other.fragments.index(mj)
+                    if (mi.HasSubstructMatch(other.templates[j]) or
+                            mj.HasSubstructMatch(self.templates[i])):
+                        mcs_size = 1
+                dfrag.append(1.0 - float(mcs_size) / max(mi_size, mj_size))
+            dtot = 1.0 if any([abs(d - 1.0) < 1.0e-06 for d in dfrag]) \
+                else sum(dfrag) / len(mols)
+            distances.append(dtot)
         return min(distances)
 
     @staticmethod
