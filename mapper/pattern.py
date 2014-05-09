@@ -191,7 +191,7 @@ class Pattern:
                             mj.HasSubstructMatch(self.templates[i])):
                         mcs_size = 1
                 dfrag.append(1.0 - float(mcs_size) / max(mi_size, mj_size))
-            dtot = 1.0 if any([abs(d - 1.0) < 1.0e-06 for d in dfrag]) \
+            dtot = 1.0 if any(abs(d - 1.0) < 1.0e-06 for d in dfrag) \
                 else sum(dfrag) / len(mols)
             distances.append(dtot)
         return min(distances)
