@@ -80,7 +80,7 @@ def test_calc_next_ecs():
     'ec_indices' should retain whatever values they had before calling it.
     """
 
-    # A simple linear molecule with' uninitialized indices (will default to
+    # A simple linear molecule with uninitialized indices (will default to
     # Funatsu method).
     chem = Chemical('CCO')
     correct_indices = (306, 390, 386)
