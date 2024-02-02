@@ -112,7 +112,6 @@ def test_remove_atoms():
     chem.remove_atoms([0])
     expected_smiles = {'CO'}
     generated_smiles = set([s for s in chem.smiles.split('.')])
-    print generated_smiles
     assert generated_smiles.issubset(expected_smiles) is True
 
     # Removing atoms leaves disjoint fragments.
@@ -120,5 +119,4 @@ def test_remove_atoms():
     chem.remove_atoms([0, 1, 2, 3, 4, 5, 6])
     expected_smiles = {'CC#N', 'NC=O'}
     generated_smiles = set([s for s in chem.smiles.split('.')])
-    print generated_smiles
     assert generated_smiles.issubset(expected_smiles) is True
