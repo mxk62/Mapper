@@ -1,6 +1,8 @@
 """Class representing molecular pattern.
 """
 
+__all__ = ["Pattern"]
+
 
 import itertools
 import re

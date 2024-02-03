@@ -1,4 +1,5 @@
 """A class representing a chemical substance."""
+__all__ = ["Chemical"]
 
 from collections.abc import Collection, Sequence
 

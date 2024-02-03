@@ -5,6 +5,8 @@ Reaction core represents substructure (bonds *and* atoms) associated with
 the reaction center.
 """
 
+__all__ = ["Core"]
+
 
 import itertools
 from rdkit import Chem
