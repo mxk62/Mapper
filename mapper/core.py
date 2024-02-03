@@ -260,3 +260,8 @@ class Core:
             [a.ClearProp('molAtomMapNumber')
              for a in m.GetAtoms() if a.HasProp('molAtomMapNumber')]
         return mols
+
+
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod()

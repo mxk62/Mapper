@@ -298,9 +298,6 @@ class Chemical:
         return matrix
 
 
-if __name__ == '__main__':
-    smi = 'CC1CCCC2CCCC(C)C12'
-    chem = Chemical(smi)
-    print chem.smiles
-    print 'First order ECs:', chem.calc_init_ecs(index_type='morgan')
-    print 'Second order ECs:', chem.calc_next_ecs(index_type='morgan')
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod()

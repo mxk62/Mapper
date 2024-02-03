@@ -221,9 +221,6 @@ class Reaction:
         return ec_map
 
 
-if __name__ == '__main__':
-    # Initial example from paper by Lynch and Willett. Output should read
-    #     C(=O)N>>C#N
-    smiles = 'CC(=O)CC(C)C(CC#N)C(=O)N>>CC(=O)CC(C)C(CC#N)C#N'
-    rxn = Reaction(smiles)
-    print rxn.find_core()
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod()

@@ -205,3 +205,8 @@ class Pattern:
         """Removes atoms map numbers."""
         tmp = re.sub(r'\[([^]]+?):(\d+)\]', r'[\1]', s)
         return re.sub(r'\[(B|b|C|c|N|n|O|o|P|S|s|F|Cl|Br|I)\]', r'\1', tmp)
+
+
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod()
