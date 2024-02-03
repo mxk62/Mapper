@@ -1,28 +1,30 @@
 """A class representing a chemical substance."""
 
+from collections.abc import Collection, Sequence
 
 import numpy
 from rdkit import Chem
 
 
 class Chemical:
-    """A class representing a chemical substance."""
+    """A class representing a chemical compound.
+
+    Parameters
+    ----------
+    smiles : str
+        A representation of a chemical compound in Daylight SMILES
+        notation.
+    ec_type : str
+
+    Raises
+    ------
+    ValueError
+        Raised if the input SMILES in invalid.
+    """
+
     multipliers = {'lynch-willet': 2, 'funatsu': 4}
 
-    def __init__(self, smiles, ec_type='funatsu'):
-        """Initializes a chemical.
-
-        Parameters
-        ----------
-        smiles : string
-            A representation of a chemical compound in Daylight SMILES
-            notation.
-
-        Raises
-        ------
-        ValueError
-            Exception is thrown if the input SMILES in invalid.
-        """
+    def __init__(self, smiles: str, ec_type: str = 'funatsu') -> None:
         self.mol = Chem.MolFromSmiles(smiles)
         if self.mol is None:
             raise ValueError('Invalid chemical SMILES.')
@@ -48,18 +50,18 @@ class Chemical:
         # though that the element of 'ec_indices' should always correspond
         # to respective atoms, i.e. first element should hold EC index of
         # the first atom; the same should hold for the second and so on.
-        self.ec_order = None
-        self.ec_indices = []
+        self.ec_order: int | None = None
+        self.ec_indices: list[int] = []
         self.multi = Chemical.multipliers.get(ec_type, 2)
 
-    def calc_init_ecs(self, index_type='funatsu'):
+    def calc_init_ecs(self, index_type: str = 'funatsu') -> tuple:
         """Calculates initial EC indices.
 
         Parameters
         ----------
-        index_type : string
-            Initial values of EC indices can be calculated using different
-            methods:
+        index_type : str, optional
+            Method to use to calculate initial values of EC indices. Available
+            methods are:
 
             - *funatsu*
             - *shelley*
@@ -69,7 +71,7 @@ class Chemical:
 
         Returns
         -------
-        indices : tuple
+        indices : tuple[int]
             A sequence in which the :math:`i`-th element represent the EC
             index of the corresponding atom.
 
@@ -114,12 +116,12 @@ class Chemical:
         ecs = numpy.array(self.ec_indices)
         return tuple(self.multi * ecs + numpy.dot(self.adjacency_matrix, ecs))
 
-    def clear_ecs(self):
+    def clear_ecs(self) -> None:
         """Clears EC indices."""
         self.ec_order = None
         self.ec_indices = []
 
-    def update_ecs(self, ecs):
+    def update_ecs(self, ecs: Sequence[int]) -> None:
         """Updates EC indices.
 
         Parameters
@@ -133,7 +135,7 @@ class Chemical:
             self.ec_order += 1
         self.ec_indices = ecs
 
-    def find_ec_mcs(self, index, radius):
+    def find_ec_mcs(self, index: int, radius: float) -> list[int]:
         """Finds all atoms belonging to a given EC-MCS.
 
         The atom's :math:`n`-order EC index may be treated as a hash of a
@@ -156,13 +158,13 @@ class Chemical:
         return [idx for idx, dist in enumerate(self.distance_matrix[index])
                 if dist < radius]
 
-    def remove_atoms(self, indices):
+    def remove_atoms(self, indices: Collection[int]) -> None:
         """Removes atoms with given indices."""
 
         # Every time an atom with is removed from a molecule, atom indices
         # higher than the deleted atom's index are adjusted. Thus, we are
         # removing them in reversed order, i.e. starting from the atom with
-        # highest.
+        # the highest index.
         e = Chem.EditableMol(self.mol)
         for i in sorted(indices, reverse=True):
             e.RemoveAtom(i)
@@ -171,7 +173,7 @@ class Chemical:
         self.distance_matrix = Chem.GetDistanceMatrix(self.mol)
         self.smiles = Chem.MolToSmiles(self.mol)
 
-    def get_atom_classes(self, atom_indices):
+    def get_atom_classes(self, atom_indices) -> set[int]:
         """Finds out atoms' classes.
 
         Method finds out the classes of atoms (type and bond pattern)
@@ -193,7 +195,7 @@ class Chemical:
                     for i in atom_indices])
 
     @staticmethod
-    def get_funatsu_identifier(atom):
+    def get_funatsu_identifier(atom: Chem):
         """Calculates an initial EC index of a given atom.
 
         After Funatsu *et al.* in Tetrahedron Computer Methodology **1**,
@@ -268,7 +270,7 @@ class Chemical:
         return 10 * valence + idx
 
     @staticmethod
-    def get_acm(mol):
+    def get_acm(mol: Chem) -> numpy.ndarray:
         """Calculates atom connectivity matrix of a molecule.
 
         Atom connectivity matrix is a weighted adjacency matrix which
