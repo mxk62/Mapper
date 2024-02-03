@@ -1,15 +1,13 @@
-"""Class representing molecular pattern.
-"""
+"""Class representing molecular pattern."""
 
 __all__ = ["Pattern"]
 
 
 import itertools
 import re
+
 from rdkit import Chem
-from rdkit.Chem import MCS
-from rdkit.Chem import SanitizeFlags
-import mapper as mp
+from rdkit.Chem import MCS, SanitizeFlags
 
 
 class Pattern:

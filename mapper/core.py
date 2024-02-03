@@ -9,10 +9,9 @@ __all__ = ["Core"]
 
 
 import itertools
+
 from rdkit import Chem
-from rdkit.Chem import MCS
-from rdkit.Chem import SanitizeFlags
-#import mapper as mp
+from rdkit.Chem import MCS, SanitizeFlags
 
 
 class Core:
