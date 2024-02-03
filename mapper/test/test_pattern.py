@@ -64,4 +64,3 @@ def test_find_distance():
     patt = Pattern('[C:4]O.[N:3][C:1]=[O:2]')
     other = Pattern('[S:1].[S:2]')
     assert abs(patt.find_distance(other) - 1.0) < 1.0e-06
-

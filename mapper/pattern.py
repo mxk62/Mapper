@@ -1,19 +1,19 @@
-"""Class representing molecular pattern.
-"""
+"""Class representing molecular pattern."""
+
+__all__ = ["Pattern"]
 
 
 import itertools
 import re
+
 from rdkit import Chem
-from rdkit.Chem import MCS
-from rdkit.Chem import SanitizeFlags
-import mapper as mp
+from rdkit.Chem import MCS, SanitizeFlags
 
 
 class Pattern:
     """Represents a molecular pattern."""
 
-    def __init__(self, smarts):
+    def __init__(self, smarts: str) -> None:
         """Initializes a pattern.
 
         Parameters
@@ -28,11 +28,11 @@ class Pattern:
 
         Examples
         --------
-        >>> p = mp.Pattern('[C:1][O:2]')
+        >>> p = Pattern('[C:1][O:2]')
 
         Pattern can be also view as an *objects* (molecular fragments), thus
 
-        >>> all(m.HasSubstruct(p) for m, p in zip(p.fragments, p.templates))
+        >>> all(m.HasSubstructMatch(p) for m, p in zip(p.fragments, p.templates))
         True
         """
         self.smarts = smarts
@@ -48,19 +48,23 @@ class Pattern:
         for m in self.fragments:
             Chem.SanitizeMol(m, sanitizeOps=opts)
 
-    def __eq__(self, other):
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, Pattern):
+            return NotImplemented
         return self.smiles == other.smiles
 
-    def __ne__(self, other):
+    def __ne__(self, other: object) -> bool:
+        if not isinstance(other, Pattern):
+            return NotImplemented
         return not self.__eq__(other)
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash(self.smiles)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.smiles
 
-    def does_contain(self, other):
+    def does_contain(self, other: "Pattern") -> bool:
         """Returns True if a pattern contains the other one.
 
         A pattern is considered to contain another one if the latter is the
@@ -76,16 +80,16 @@ class Pattern:
         Core ``[C:1][O:2]`` contain core ``[C:2]`` as the latter core's is
         a substructure of ``[C:1][O:2]``.
 
-        >>> patt = mp.Pattern('[C:1][O:2]')
-        >>> other = mp.Pattern('[C:2]')
+        >>> patt = Pattern('[C:1][O:2]')
+        >>> other = Pattern('[C:2]')
         >>> patt.does_contain(other)
         True
 
         Conversely, it does not contain ``[S:2]`` as it is not a substructure
         of ``[C:1][O:2]``.
 
-        >>> patt = mp.Pattern('[C:1][O:2]')
-        >>> other = mp.Pattern('[S:2]')
+        >>> patt = Pattern('[C:1][O:2]')
+        >>> other = Pattern('[S:2]')
         >>> patt.does_contain(other)
         False
 
@@ -99,15 +103,15 @@ class Pattern:
 
         Thus
 
-        >>> patt = mp.Pattern('[C:4]O.[N:3][C:1]=[O:2]')
-        >>> other = mp.Core('[N:3].[C:2]O')
+        >>> patt = Pattern('[C:4]O.[N:3][C:1]=[O:2]')
+        >>> other = Pattern('[N:3].[C:2]O')
         >>> patt.does_contain(other)
         True
 
         but
 
-        >>> patt = mp.Core('[C:4]O.[N:3][C:1]=[O:2]')
-        >>> other = mp.Core('[C:1]=O')
+        >>> patt = Pattern('[C:4]O.[N:3][C:1]=[O:2]')
+        >>> other = Pattern('[C:1]=O')
         >>> patt.does_contain(other)
         False
         """
@@ -119,7 +123,7 @@ class Pattern:
                 return True
         return False
 
-    def find_distance(self, other):
+    def find_distance(self, other: "Pattern"):
         r"""Finds similarity distance between two molecular patterns.
 
         Similarity distance of two *connected* molecules :math:`m_{1}` and
@@ -197,7 +201,12 @@ class Pattern:
         return min(distances)
 
     @staticmethod
-    def _strip_map(s):
+    def _strip_map(s: str) -> str:
         """Removes atoms map numbers."""
         tmp = re.sub(r'\[([^]]+?):(\d+)\]', r'[\1]', s)
         return re.sub(r'\[(B|b|C|c|N|n|O|o|P|S|s|F|Cl|Br|I)\]', r'\1', tmp)
+
+
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod()

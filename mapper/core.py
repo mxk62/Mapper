@@ -5,46 +5,46 @@ Reaction core represents substructure (bonds *and* atoms) associated with
 the reaction center.
 """
 
+__all__ = ["Core"]
+
 
 import itertools
+
 from rdkit import Chem
-from rdkit.Chem import MCS
-from rdkit.Chem import SanitizeFlags
-#import mapper as mp
+from rdkit.Chem import MCS, SanitizeFlags
 
 
 class Core:
-    """Represents a reaction core."""
+    """Represents a reaction core.
 
-    def __init__(self, smarts):
-        """Initializes a reaction core.
+    Parameters
+    ----------
+    smarts : str
+        Reaction core encoded using Daylight SMARTS notation.
 
-        Parameters
-        ----------
-        smarts : string
-            Reaction core encoded using Daylight SMARTS notation.
+    Raises
+    ------
+    ValueError
+        Raised if the input SMARTS is invalid.
 
-        Raises
-        ------
-        ValueError
-            This exception is raised if the input SMARTS is invalid.
+    Examples
+    --------
+    >>> c = Core('[C:1][O:2]>>[C:1]=[O:2]')
 
-        Examples
-        --------
-        >>> c = mp.Core('[C:1][O:2]>>[C:1]=[O:2]')
+    Core parts represent *patterns* but can be also view as
+    *objects* (molecular fragments), thus
 
-        Core parts represent *patterns* but can be also view as
-        *objects* (molecular fragments), thus
+    >>> all(m.HasSubstructMatch(p) for m, p in zip(c.reactants, c.retrons))
+    True
 
-        >>> all(m.HasSubstruct(p) for m, p in zip(c.reactants, c.retrons))
-        True
+    The same holds for synthons too, e.g.
 
-        The same holds for synthons too, e.g.
+    >>> all(m.HasSubstructMatch(p) for m, p in zip(c.products, c.synthons))
+    True
 
-        >>> all(m.HasSubstruct(p) for m, p in zip(c.products, c.synthons))
-        True
+    """
 
-        """
+    def __init__(self, smarts: str):
         self.smarts = smarts
 
         frags = [frag.split('.') for frag in smarts.split('>>')]
@@ -67,19 +67,23 @@ class Core:
             '.'.join([Chem.MolToSmiles(m) for m in self.products])
         ])
 
-    def __eq__(self, other):
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, Core):
+            return NotImplemented
         return self.smiles == other.smiles
 
-    def __ne__(self, other):
+    def __ne__(self, other: object) -> bool:
+        if not isinstance(other, Core):
+            return NotImplemented
         return not self.__eq__(other)
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash(self.smiles)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.smarts
 
-    def does_contain(self, other):
+    def does_contain(self, other: "Core") -> bool:
         """Returns True if a core's retrons contains retrons of the other one.
 
         A retron is considered to contain another one if the latter is the
@@ -96,16 +100,16 @@ class Core:
         the latter core's retron, ``[C:2]``, is a substructure of
         ``[C:1][O:2]``.
 
-        >>> core = mp.Core('[C:1][O:2]>>[C:1]=[O:2]')
-        >>> other = mp.Core('[C:2]>>[C:2]Br')
+        >>> core = Core('[C:1][O:2]>>[C:1]=[O:2]')
+        >>> other = Core('[C:2]>>[C:2]Br')
         >>> core.does_contain(other)
         True
 
         Conversely, it does not contain the core ``[S:2]>>O=[S:2]=O`` as the
         retron ``[S:2]`` is not a substructure of ``[C:1][O:2]``.
 
-        >>> core = mp.Core('[C:1][O:2]>>[C:1]=[O:2]')
-        >>> other = mp.Core('[S:2]>>O=[S:2]=O')
+        >>> core = Core('[C:1][O:2]>>[C:1]=[O:2]')
+        >>> other = Core('[S:2]>>O=[S:2]=O')
         >>> core.does_contain(other)
         False
 
@@ -118,15 +122,15 @@ class Core:
 
         Thus
 
-        >>> core = mp.Core('[C:4]O.[N:3][C:1]=[O:2]>>[C:4][O:2][C:1]=[N:3]')
-        >>> other = mp.Core('[N:3].[C:2]O>>[C:2][N:3]')
+        >>> core = Core('[C:4]O.[N:3][C:1]=[O:2]>>[C:4][O:2][C:1]=[N:3]')
+        >>> other = Core('[N:3].[C:2]O>>[C:2][N:3]')
         >>> core.does_contain(other)
         True
 
         but
 
-        >>> core = mp.Core('[C:4]O.[N:3][C:1]=[O:2]>>[C:4][O:2][C:1]=[N:3]')
-        >>> other = mp.Core('[C:1]=O>>[C:1]=C')
+        >>> core = Core('[C:4]O.[N:3][C:1]=[O:2]>>[C:4][O:2][C:1]=[N:3]')
+        >>> other = Core('[C:1]=O>>[C:1]=C')
         >>> core.does_contain(other)
         False
         """
@@ -138,9 +142,21 @@ class Core:
                 return True
         return False
 
-    def find_distance(self, other):
+    def find_distance(self, other: "Core"):
         r"""Finds similarity distance between two molecular fragments.
 
+        Parameters
+        ----------
+        other : Core
+            The other molecule
+
+        Returns
+        -------
+        distance : float
+            Similarity distance between this and other molecule.
+
+        Note
+        ----
         Similarity distance of two molecules is a *metric* defined as
 
         .. math::
@@ -164,7 +180,7 @@ class Core:
 
         distances = []
         for mols in itertools.permutations(self.reactants):
-            d = 0
+            d = 0.0
             for idx, (moli, molj) in enumerate(zip(mols, other.reactants)):
                 moli_size = len(moli.GetAtoms())
                 molj_size = len(molj.GetAtoms())
@@ -183,16 +199,38 @@ class Core:
             distances.append(d / len(mols))
         return min(distances)
 
-    def _strip(self, mols):
-        """Strips reactants off unwanted elements."""
+    def _strip(self, mols: list[Chem]) -> list[Chem]:
+        """Strips reactants off unwanted elements.
+
+        Parameters
+        ---------
+        mols : list[Chem]
+            List of reactants to clean up.
+
+        Returns
+        -------
+        mols : list[Chem]
+            List of reactants with unwanted elements removed.
+        """
 
         # The order of operations is important here as stripping atom map
         # numbers first will lead to total removal of the molecules.
         return self._strip_map(self._strip_env(mols))
 
     @staticmethod
-    def _strip_env(mols):
-        """Removes unmapped atoms."""
+    def _strip_env(mols: list[Chem]) -> list[Chem]:
+        """Removes unmapped atoms.
+
+        Parameters
+        ---------
+        mols : list[Chem]
+            List of molecules to clean up.
+
+        Returns
+        -------
+        mols : list[Chem]
+            List of molecules with unmapped atoms removed.
+        """
         for m in mols:
             indices = [a.GetIdx() for a in m.GetAtoms()
                        if not a.HasProp('molAtomMapNumber')]
@@ -205,9 +243,25 @@ class Core:
         return mols
 
     @staticmethod
-    def _strip_map(mols):
-        """Removes atoms map numbers."""
+    def _strip_map(mols: list[Chem]) -> list[Chem]:
+        """Removes atoms map numbers.
+
+        Parameters
+        ---------
+        mols : list[Chem]
+            List of molecules to clean up.
+
+        Returns
+        -------
+        mols : list[Chem]
+            List of molecules stripped of atom map numbers.
+        """
         for m in mols:
             [a.ClearProp('molAtomMapNumber')
              for a in m.GetAtoms() if a.HasProp('molAtomMapNumber')]
         return mols
+
+
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod()

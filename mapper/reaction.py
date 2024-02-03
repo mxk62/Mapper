@@ -1,14 +1,29 @@
-"""Implementation of Lynch-Willet algorithm."""
+"""Implementation of Lynch-Willett algorithm."""
+
+__all__ = ["Reaction"]
+
+
+from collections.abc import Sequence
 
 from rdkit import Chem
+
 from mapper import Chemical
 
 
 class Reaction:
-    """A class representing a chemical reaction."""
+    """A class representing a chemical reaction.
 
-    def __init__(self, smiles, verbose=False):
-        self.reactant_smiles, self.product_smiles = smiles.split('>>')
+    Parameters
+    ----------
+    rxn_smiles : str
+        A representation of a chemical reaction in Daylight SMILES
+        notation.
+    verbose : bool
+        If true, extra messages will be provided. Defaults to False.
+    """
+
+    def __init__(self, rxn_smiles: str, verbose: bool = False) -> None:
+        self.reactant_smiles, self.product_smiles = rxn_smiles.split('>>')
         self.reactant = Chemical(self.reactant_smiles)
         if self.reactant is None:
             raise ValueError('Invalid reactant SMILES')
@@ -17,13 +32,27 @@ class Reaction:
             raise ValueError('Invalid product SMILES')
         self.verbose = verbose
 
-    def find_core(self):
+    def find_core(self) -> str:
         """Extracts a reaction core.
 
-        Function uses the Lynch-Willet algorithm to detect the reaction center.
+        Function uses the Lynch-Willett algorithm to detect a reaction center.
+
+        Returns
+        -------
+        core : str
+            SMILES representing the reaction core.
+
+        Examples
+        --------
+        Initial example from paper by Lynch and Willett:
+
+        >>> smiles = 'CC(=O)CC(C)C(CC#N)C(=O)N>>CC(=O)CC(C)C(CC#N)C#N'
+        >>> rxn = Reaction(smiles)
+        >>> print(rxn.find_core())
+        NC=O>>C#N
         """
-        old_reactant_ecs = []
-        old_product_ecs = []
+        old_reactant_ecs: Sequence[int] = []
+        old_product_ecs: Sequence[int] = []
         while True:
             # Assign initial EC values to the reactant and the product.
             reactant_ecs = self.reactant.calc_init_ecs(index_type='shelley')
@@ -86,18 +115,18 @@ class Reaction:
             rad = test_ec_order - 2
 
             if self.verbose:
-                print 'Mappings (match radius: {0}):'.format(test_ec_order - 2)
+                print('Mappings (match radius: {0}):'.format(test_ec_order - 2))
                 self.show_mappings(common_ecs)
 
-            # According to Lynch and Willett, allowing match  radius smaller
+            # According to Lynch and Willett, allowing match radius smaller
             # than 2 bonds significantly increases the number of incorrect
             # results. Thus, we are skipping finding the EC-MCS and terminating
             # the procedure in such a case.
             if rad < 2:
                 break
 
-            reactant_ec_mcs = set([])
-            product_ec_mcs = set([])
+            reactant_ec_mcs = set()
+            product_ec_mcs = set()
             for ec in common_ecs:
                 # If a given EC value corresponds to multiple atoms,
                 # check their equivalence, i.e. all reactant atoms are
@@ -134,30 +163,57 @@ class Reaction:
         return '>>'.join([Chem.MolToSmiles(self.reactant.mol),
                           Chem.MolToSmiles(self.product.mol)])
 
-    def show_mappings(self, common_ecs):
-        """Prints out all atom mappings."""
+    def show_mappings(self, common_ecs: set[int]) -> None:
+        """Prints out all atom mappings.
+
+        Parameters
+        ----------
+        common_ecs : Sequence[int]
+            Common EC indices.
+        """
         for ec in common_ecs:
             lhs = ', '.join(['{0}:{1}'.format(*pair)
                              for pair in self._map_symbols(self.reactant, ec)])
             rhs = ', '.join(['{0}:{1}'.format(*pair)
                              for pair in self._map_symbols(self.product, ec)])
-            print ec, ': ', lhs, '<-->', rhs
+            print(ec, ': ', lhs, '<-->', rhs)
 
     @staticmethod
-    def _map_symbols(chem, ec):
-        """Returns pairs of atom symbols and their molecular indices."""
+    def _map_symbols(chem: Chemical, ec: int) -> list[tuple[str, int]]:
+        """Returns pairs of atom symbols and their molecular indices.
+
+        Parameters
+        ----------
+        chem : Chem
+            A molecule to create mapping for.
+
+        Returns
+        -------
+        pairs : list[tuple[str, int]]
+            List of atoms symbols paired with their molecular indices.
+        """
         indices = [chem.mol.GetAtomWithIdx(i).GetProp('initIdx')
                    for i, v in enumerate(chem.ec_indices) if v == ec]
         symbols = [chem.mol.GetAtomWithIdx(i).GetSymbol()
                    for i, v in enumerate(chem.ec_indices) if v == ec]
-        return zip(symbols, indices)
+        return list(zip(symbols, indices))
 
     @staticmethod
-    def make_ec_map(ecs):
-        """Returns a map between atoms ECs and their indices.
+    def make_ec_map(ecs: Sequence[int]) -> dict[int, list[int]]:
+        """Create a map between atoms' EC indices and their indices.
 
         Creates and returns a dictionary which keys are the EC indices and
         corresponding values are lists of atom indices with a given EC.
+
+        Parameters
+        ----------
+        ecs : Sequence[int]
+            List of EC indices.
+
+        Returns
+        -------
+        ec_map : dict[int, list[int]]
+            The mapping between ECs and atom indices.
         """
         ec_map = {}
         for idx, ec in enumerate(ecs):
@@ -165,9 +221,6 @@ class Reaction:
         return ec_map
 
 
-if __name__ == '__main__':
-    # Initial example from paper by Lynch and Willett. Output should read
-    #     C(=O)N>>C#N
-    smiles = 'CC(=O)CC(C)C(CC#N)C(=O)N>>CC(=O)CC(C)C(CC#N)C#N'
-    rxn = Reaction(smiles)
-    print rxn.find_core()
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod()

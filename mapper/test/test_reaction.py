@@ -40,12 +40,12 @@ def test_find_core():
     # rather vague description. It would also require writing a 'translator'
     # between SMILES and WLN notation on which it is based.
     #
-    #smiles = '>>'.join([
-    #    'COc1ccc2c(c1)sc1c2CCC2C1=CCC2O',
-    #    'COc1ccc2c(c1)sc1c2CCC2C1CCC2O'
-    #])
-    #rxn = Reaction(smiles)
-    #assert rxn.find_core() == 'C=CC>>CCC'
+    # smiles = '>>'.join([
+    #     'COc1ccc2c(c1)sc1c2CCC2C1=CCC2O',
+    #     'COc1ccc2c(c1)sc1c2CCC2C1CCC2O'
+    # ])
+    # rxn = Reaction(smiles)
+    # assert rxn.find_core() == 'C=CC>>CCC'
 
     # Problematic reactions, violating algorithm assumption---no atom should
     # be deleted; also from the paper by Lynch and Willett.
@@ -53,14 +53,14 @@ def test_find_core():
     #
     # Ambiguous mapping.
     #
-    # RDKit (2013_09_01) is having problem with this SMILES so we are skipping
+    # RDKit (2013_09_01) is having problem with this SMILES, so we are skipping
     # them for now.
-    #smiles = '>>'.join([
-    #    'c1ccc2c(c1)C=Cc1ccccc1NN2',
-    #    'CN1Nc2ccccc2C=Cc2c1cccc2'
-    #])
-    #rxn = Reaction(smiles)
-    #assert rxn.find_core == smiles
+    # smiles = '>>'.join([
+    #     'c1ccc2c(c1)C=Cc1ccccc1NN2',
+    #     'CN1Nc2ccccc2C=Cc2c1cccc2'
+    # ])
+    # rxn = Reaction(smiles)
+    # assert rxn.find_core == smiles
 
     smiles = '>>'.join([
         'N=C1ON=C2CCCCC12',
@@ -69,7 +69,7 @@ def test_find_core():
     rxn = Reaction(smiles)
     assert rxn.find_core() == smiles
 
-    # Match radius is to small.
+    # Match radius is too small.
     smiles = '>>'.join([
         'CC(C)(O)C1CCCO1',
         'CC1=COCCC1C'
