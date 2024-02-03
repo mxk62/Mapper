@@ -180,7 +180,7 @@ class Core:
 
         distances = []
         for mols in itertools.permutations(self.reactants):
-            d = 0
+            d = 0.0
             for idx, (moli, molj) in enumerate(zip(mols, other.reactants)):
                 moli_size = len(moli.GetAtoms())
                 molj_size = len(molj.GetAtoms())

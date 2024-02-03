@@ -115,7 +115,7 @@ class Reaction:
             rad = test_ec_order - 2
 
             if self.verbose:
-                print 'Mappings (match radius: {0}):'.format(test_ec_order - 2)
+                print('Mappings (match radius: {0}):'.format(test_ec_order - 2))
                 self.show_mappings(common_ecs)
 
             # According to Lynch and Willett, allowing match radius smaller
@@ -125,8 +125,8 @@ class Reaction:
             if rad < 2:
                 break
 
-            reactant_ec_mcs = set([])
-            product_ec_mcs = set([])
+            reactant_ec_mcs = set()
+            product_ec_mcs = set()
             for ec in common_ecs:
                 # If a given EC value corresponds to multiple atoms,
                 # check their equivalence, i.e. all reactant atoms are
