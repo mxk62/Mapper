@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mapper"
+version = "0.1"
+dependencies = [
+    "numpy",
+    "rdkit",
+]
+requires-python = ">=3.11"
+authors = [
+    {name = "Mikolaj Kowalik", email = "mxk@illinois.edu"},
+]
+maintainers = [
+    {name = "Mikolaj Kowalik", email = "mxk@illinois.edu"},
+]
+description = "Approximate structure-matching algorithm by Lynch and Willett"
+readme = "README.md"
+license = {file = "LICENSE"}
+keywords = ["chemoinformatics", "structure matching", "Lynch-Wilett"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Programming Langugage :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+
+[project.optional-dependencies]
+test = [
+    "coverage",
+    "pytest",
+]
+
+[project.urls]
+Homepage = "https://github.com/mxk62/Mapper"
+Issues = "https://github.com/mxk62/Mapper/issues"
+
+[tool.black]
+target-version = ["py311"]
+
+[tool.isort]
+profile = "black"
