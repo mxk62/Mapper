@@ -7,7 +7,7 @@ from collections.abc import Sequence
 
 from rdkit import Chem
 
-from mapper import Chemical
+from .chemical import Chemical
 
 
 class Reaction:
