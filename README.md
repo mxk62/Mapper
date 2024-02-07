@@ -5,28 +5,76 @@ proposed by Lynch and Willett [1]. It applies the Morgan algorithm [2] with
 different stopping rule *simultaneously* to both reacting molecules to detect
 inter-molecular equivalences. 
 
-The authors of Ref. [1] are a bit vague as far as assigning initial EC indices
-is concerned. Thus, besides original Morgan's approach, two alternative methods
-[3,4] were implemented.
+The authors of Ref. [1] are a bit vague as far as assigning initial extended
+connectivity  indices is concerned. Thus, besides original Morgan's approach,
+two alternative methods [3,4] were implemented.
 
 ## Requirements
 
-**Mapper** requires:
+**Mapper** depends on:
 
-*	[RDKit](http://www.rdkit.org) toolkit;
+* [Python](https://www.python.org/) (version 3.11+)
+* [numpy](https://numpy.org/)
+* [RDKit](http://www.rdkit.org) toolkit
+
+## Installation
+
+Create a virtual environment with
+
+```
+python3 -m venv <ENV_DIR>
+```
+
+where ``<ENV_DIR>`` is any directory, for example ``$HOME/venvs/mapper``.
+
+Clone the package repository with
+
+```
+git clone https://github.com/mxk62/Mapper.git
+```
+
+Switch to the package directory and activate the virtual environment you created
+earlier
+
+```
+cd Mapper
+source $HOME/venvs/mapper
+```
+
+and install the package using `pip`
+
+```
+pip install --user .
+```
+
+If you want to be able to generate package documentation, you need to install
+additional (optional) dependencies with
 
 
-## Manifest
+```
+pip install --user .[docs]
+```
 
-Package directory should contain:
+instead. Then you can generate the documentation simply with
 
-*  `README.md`: this file.
-*	**mapper**:
-	+	`chemical.py`: definition of Chemical class;
-	+	`reaction.py`: definition of Reaction class;
-	+	**test**: unit tests files
-		-	`test_chemical.py`: unit tests for Chemical class;
-		-	`test_reaction.py`: unit tests for Reaction class;
+```
+cd docs
+make html
+```
+
+If building documentation finished successfully, open `_build/html/index.html`
+in your web browser.
+
+### Note
+
+A fair warning though. At the moment the documentation is just an API
+reference. Having said that this should provide some insight how to use the
+package.
+
+## Misc
+
+Other files you can find in the package directory are:
+
 * 	`demo.py`: a (very) simple CLI for demonstration purposes.
 * 	`rxns.smi`: example reactions from Ref. [1] encoded in SMILES format.
 
