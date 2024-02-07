@@ -1,4 +1,4 @@
-"""Class representing reaction core.
+"""Class representing a reaction core.
 
 Reaction center indicates bond(s) broken or formed during the reaction.
 Reaction core represents substructure (bonds *and* atoms) associated with
@@ -15,7 +15,7 @@ from rdkit.Chem import MCS, SanitizeFlags
 
 
 class Core:
-    """Represents a reaction core.
+    """Class representing a reaction core.
 
     Parameters
     ----------

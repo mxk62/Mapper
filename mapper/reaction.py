@@ -11,7 +11,7 @@ from mapper import Chemical
 
 
 class Reaction:
-    """A class representing a chemical reaction.
+    """Class representing a chemical reaction.
 
     Parameters
     ----------
