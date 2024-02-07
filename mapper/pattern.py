@@ -1,4 +1,4 @@
-"""Class representing molecular pattern."""
+"""Class representing a molecular pattern."""
 
 __all__ = ["Pattern"]
 
@@ -11,7 +11,7 @@ from rdkit.Chem import MCS, SanitizeFlags
 
 
 class Pattern:
-    """Represents a molecular pattern."""
+    """Class representing a molecular pattern."""
 
     def __init__(self, smarts: str) -> None:
         """Initializes a pattern.
@@ -123,7 +123,7 @@ class Pattern:
                 return True
         return False
 
-    def find_distance(self, other: "Pattern"):
+    def find_distance(self, other: "Pattern") -> float:
         r"""Finds similarity distance between two molecular patterns.
 
         Similarity distance of two *connected* molecules :math:`m_{1}` and

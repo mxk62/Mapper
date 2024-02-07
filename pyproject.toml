@@ -31,6 +31,11 @@ test = [
     "coverage",
     "pytest",
 ]
+docs = [
+    "sphinx",
+    "sphinx-autoapi",
+    "sphinx-rtd-theme",
+]
 
 [project.urls]
 Homepage = "https://github.com/mxk62/Mapper"

@@ -1,4 +1,4 @@
-"""A class representing a chemical substance."""
+"""A class representing a chemical compound."""
 
 __all__ = ["Chemical"]
 
@@ -10,14 +10,20 @@ from rdkit import Chem
 
 
 class Chemical:
-    """A class representing a chemical compound.
+    """Class representing a chemical compound.
 
     Parameters
     ----------
     smiles : str
         A representation of a chemical compound in Daylight SMILES
         notation.
-    ec_type : str
+    ec_type : str, optional
+        Type of the extended connectivity indices to use. Available options are
+
+        * ``lynch-willett``,
+        * ``funatsu``.
+
+        Defaults to ``funatsu``.
 
     Raises
     ------
@@ -25,7 +31,7 @@ class Chemical:
         Raised if the input SMILES in invalid.
     """
 
-    multipliers = {'lynch-willet': 2, 'funatsu': 4}
+    multipliers = {'lynch-willett': 2, 'funatsu': 4}
 
     def __init__(self, smiles: str, ec_type: str = 'funatsu') -> None:
         self.mol = Chem.MolFromSmiles(smiles)
